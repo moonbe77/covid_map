@@ -11,7 +11,7 @@ export default function Home() {
     <div>
       <Title>Covid MAP</Title>
       <Link href="/map">
-        <a>map</a>
+        <a>Map of recent cases</a>
       </Link>
     </div>
   );

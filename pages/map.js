@@ -66,7 +66,7 @@ export default function MapHome() {
     //   return state;
     // });
   }, [isolate]);
-
+  console.log(process.env.NEXT_PUBLIC_MAPS_API_KEY);
   return (
     <div>
       <h1>Venues data</h1>
@@ -75,7 +75,7 @@ export default function MapHome() {
         <MapWrapper>
           <GoogleMapReact
             bootstrapURLKeys={{
-              key: 'AIzaSyAZmaRsCebNDIIC9AwQtMv1yCMhGGuMYcc',
+              key: process.env.NEXT_PUBLIC_MAPS_API_KEY,
             }}
             center={mapState.center}
             zoom={mapState.zoom}

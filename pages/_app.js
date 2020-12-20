@@ -4,7 +4,6 @@ import Layout from '../components/layout/Layout';
 
 const GlobalStyle = createGlobalStyle`
   body {
-    border:1px solid red;
     margin: 0px;
     padding: 0px;
     box-sizing: border-box;

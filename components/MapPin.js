@@ -15,7 +15,6 @@ const MapPinStyled = styled.div`
 `;
 
 export default function MapPin({ text, typeOfPin }) {
-  console.log(typeOfPin);
   return (
     <MapPinStyled>
       {typeOfPin === 'monitors' ? <AiOutlineMonitor /> : <GrLocationPin />}
