@@ -130,5 +130,3 @@ export default function MapHome() {
     </div>
   );
 }
-
-const AnyReactComponent = ({ text }) => <div>{text}</div>;
