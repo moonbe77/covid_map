@@ -4,13 +4,16 @@ import GoogleMapReact from 'google-map-react';
 import { GrLocationPin } from 'react-icons/gr';
 import { AiOutlineMonitor } from 'react-icons/ai';
 import MapPin from '../components/MapPin';
+import ReturnArrow from '../components/ReturnArrow';
+import Divider from '../components/Divider';
 
 const VenuesWrapper = styled.div`
   display: flex;
   flex-direction: row;
+  margin: 0 25%;
 `;
 const ListOfVenues = styled.div`
-  border: 1px solid red;
+  /* border: 1px solid red; */
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -58,20 +61,17 @@ export default function MapHome() {
       setMonitor(venues.data.monitor);
     }
   }, [venues]);
-  useEffect(() => {
-    console.log(isolate);
 
-    // setMapState((state) => {
-    //   state.center = [isolate[0].Lat, isolate[0].Lon];
-    //   return state;
-    // });
-  }, [isolate]);
-  console.log(process.env.NEXT_PUBLIC_MAPS_API_KEY);
+  // TODO: add dynamic centering and zoom of map.
+  // useEffect(() => {
+  // }, [isolate]);
+
   return (
     <div>
+      <ReturnArrow />
+      <Divider />
       <h1>Venues data</h1>
       <Map>
-        <h1>map</h1>
         <MapWrapper>
           <GoogleMapReact
             bootstrapURLKeys={{
