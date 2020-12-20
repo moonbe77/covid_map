@@ -6,7 +6,6 @@ const MainContainer = styled.main`
   max-width: 1280px;
   margin: 0 auto;
   padding: 10px;
-  height: 100vh;
   background-color: whitesmoke;
 `;
 
