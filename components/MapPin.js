@@ -7,16 +7,35 @@ const MapPinStyled = styled.div`
   border: 1px solid red;
   font-size: 2rem;
   height: 30px;
-  left: -15px;
   position: absolute;
   text-align: center;
-  top: -30px;
   width: 30px;
+  top: -15px;
+  left: -15px;
+  transform: 'translate(-50%, -50%)';
+  cursor: pointer;
+
+  svg {
+    pointer-events: none;
+  }
 `;
 
-export default function MapPin({ text, typeOfPin }) {
+export default function MapPin(props) {
+  const {
+    text,
+    typeOfPin,
+    onClick,
+    'data-index': dataIndex,
+    'data-type': dataType,
+  } = props;
+
   return (
-    <MapPinStyled>
+    <MapPinStyled
+      onClick={onClick}
+      data-index={dataIndex}
+      data-type={dataType}
+      typeOfPin={typeOfPin}
+    >
       {typeOfPin === 'monitors' ? <AiOutlineMonitor /> : <GrLocationPin />}
     </MapPinStyled>
   );
