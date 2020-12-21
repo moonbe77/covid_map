@@ -2,20 +2,23 @@ import styled from 'styled-components';
 
 const MainContainer = styled.main`
   display: block;
-  margin: 0 auto;
-  padding: 10px;
-  background-color: whitesmoke;
+  background-color: white;
+  min-height: calc(100vh - 50px);
 `;
 const Footer = styled.footer`
+  padding: 1rem 0;
+  margin-top: 2rem;
+  background-color: black;
+  color: #fff;
   text-align: center;
 `;
 export default function Layout({ children }) {
   return (
-    <MainContainer>
-      <section>{children}</section>
+    <>
+      <MainContainer>{children}</MainContainer>
       <Footer>
         <p>Website made with love by BMDev</p>
       </Footer>
-    </MainContainer>
+    </>
   );
 }

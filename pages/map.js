@@ -17,15 +17,28 @@ const Columns = styled.div`
 `;
 const VenuesWrapper = styled.div`
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   margin-top: 1rem;
 `;
 
-const ListOfVenues = styled.div`
-  display: flex;
-  padding-left: 1rem;
-  flex-direction: column;
-  flex: 1;
+const ListOfVenues = styled.table`
+  th {
+    background-color: black;
+    color: white;
+    padding: 5px;
+  }
+  /* tr {
+    height: 40px;
+  } */
+  td {
+    padding: 10px 5px;
+  }
+  tr:nth-child(2n + 3) {
+    background-color: #e5e5e5;
+  }
+`;
+const TableTitle = styled.div`
+  text-align: center;
 `;
 
 const MapWrapper = styled.div`
@@ -34,16 +47,16 @@ const MapWrapper = styled.div`
 `;
 
 const MapBox = styled.div`
-  width: 100%;
   height: 60vh;
   position: relative;
+  width: 100%;
 `;
 
 const MapOptions = styled.div`
+  align-items: center;
   display: flex;
   flex-direction: row;
   justify-content: space-around;
-  align-items: center;
   padding: 1em;
 `;
 const ToggleData = styled.div`
@@ -149,7 +162,7 @@ export default function MapHome() {
       <Columns>
         <MapWrapper>
           <MapOptions>
-            <div>dataset date: {venues.date}</div>
+            <div>Dataset Date: {venues.date}</div>
             <ToggleData>
               <label htmlFor="monitor">
                 <input
@@ -220,26 +233,67 @@ export default function MapHome() {
           </MapBox>
         </MapWrapper>
         <VenuesWrapper>
+          <TableTitle>
+            <h3>
+              <GrLocationPin /> Isolate
+            </h3>
+          </TableTitle>
           {Object.keys(venues).length !== 0 && (
             <>
               <ListOfVenues>
-                <h3>
-                  <GrLocationPin />
-                  Isolate
-                </h3>
+                <tr>
+                  <th>Venue</th>
+                  <th>Suburb</th>
+                  <th>Address</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Alert</th>
+                </tr>
                 {isolate.length > 0 &&
                   isolate.map((venue, i) => (
-                    <div key={`isolate${i}`}>{venue.Venue}</div>
+                    <tr key={`isolate${i}`}>
+                      <td>{venue.Venue}</td>
+                      <td>{venue.Suburb}</td>
+                      <td>{venue.Address}</td>
+                      <td>{venue.Date}</td>
+                      <td>{venue.Time}</td>
+                      <td
+                        dangerouslySetInnerHTML={{
+                          __html: venue.HealthAdviceHTML,
+                        }}
+                      />
+                    </tr>
                   ))}
               </ListOfVenues>
-              <ListOfVenues>
+              <TableTitle>
                 <h3>
                   <AiOutlineMonitor />
                   Monitor
                 </h3>
+              </TableTitle>
+              <ListOfVenues>
+                <tr>
+                  <th>Venue</th>
+                  <th>Suburb</th>
+                  <th>Address</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>alert</th>
+                </tr>
                 {monitors.length > 0 &&
                   monitors.map((venue, i) => (
-                    <div key={`monitors${i}`}>{venue.Venue}</div>
+                    <tr key={`monitor${i}`}>
+                      <td>{venue.Venue}</td>
+                      <td>{venue.Suburb}</td>
+                      <td>{venue.Address}</td>
+                      <td>{venue.Date}</td>
+                      <td>{venue.Time}</td>
+                      <td
+                        dangerouslySetInnerHTML={{
+                          __html: venue.HealthAdviceHTML,
+                        }}
+                      />
+                    </tr>
                   ))}
               </ListOfVenues>
             </>
