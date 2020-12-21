@@ -6,7 +6,7 @@ const SnapshotStyled = styled.div`
   height: 100%;
   right: 80px;
   max-height: 200px;
-  max-width: 300px;
+  max-width: 350px;
   overflow: hidden;
   padding: 10px;
   position: absolute;
@@ -19,6 +19,7 @@ const VenueTag = styled.div`
   font-size: 1.2rem;
   font-weight: 700;
 `;
+
 const SuburbTag = styled.div`
   font-size: 1.1rem;
   font-weight: 700;
@@ -26,8 +27,11 @@ const SuburbTag = styled.div`
 const AddressTag = styled.div`
   color: gray;
   margin: 5px 0;
+  margin-top: 1rem;
 `;
-const DateTag = styled.div``;
+const DateTag = styled.div`
+  margin-top: 1rem;
+`;
 const TimeTag = styled.div``;
 
 const Close = styled.div`

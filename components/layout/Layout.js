@@ -6,7 +6,16 @@ const MainContainer = styled.main`
   padding: 10px;
   background-color: whitesmoke;
 `;
-
+const Footer = styled.footer`
+  text-align: center;
+`;
 export default function Layout({ children }) {
-  return <MainContainer>{children}</MainContainer>;
+  return (
+    <MainContainer>
+      <section>{children}</section>
+      <Footer>
+        <p>Website made with love by BMDev</p>
+      </Footer>
+    </MainContainer>
+  );
 }

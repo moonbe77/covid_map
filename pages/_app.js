@@ -3,12 +3,15 @@ import { createGlobalStyle, ThemeProvider } from 'styled-components';
 import Layout from '../components/layout/Layout';
 
 const GlobalStyle = createGlobalStyle`
-  body {
-    margin: 0px;
-    padding: 0px;
+ 
+  body,html {
+    margin: 0;
+    padding: 0;
+    font-size: 16px;
+}
+* {
     box-sizing: border-box;
-    background-color: gray;
-  }
+}
 `;
 
 const theme = {
