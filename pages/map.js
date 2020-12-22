@@ -5,11 +5,11 @@ import styled from 'styled-components';
 import GoogleMapReact from 'google-map-react';
 import { GrLocationPin } from 'react-icons/gr';
 import { AiOutlineMonitor } from 'react-icons/ai';
-import { check } from 'prettier';
 import MapPin from '../components/MapPin';
 import ReturnArrow from '../components/ReturnArrow';
 import Divider from '../components/Divider';
 import Snapshot from '../components/Snapshot';
+import useLocation from '../hook/useLocation';
 
 const Columns = styled.div`
   display: flex;
@@ -22,14 +22,14 @@ const VenuesWrapper = styled.div`
 `;
 
 const ListOfVenues = styled.table`
-  th {
+  thead {
     background-color: black;
     color: white;
     padding: 5px;
   }
-  /* tr {
+  thead {
     height: 40px;
-  } */
+  }
   td {
     padding: 10px 5px;
   }
@@ -77,6 +77,8 @@ export default function MapHome() {
     zoom: 10,
   });
 
+  const location = useLocation();
+  console.log(location);
   useEffect(() => {
     console.log('fetching data');
     fetch(
@@ -101,8 +103,7 @@ export default function MapHome() {
   }, [venues]);
 
   // TODO: add dynamic centering and zoom of map.
-  // useEffect(() => {
-  // }, [isolate]);
+  useEffect(() => {}, []);
 
   const getData = (type, index) => {
     switch (type) {
@@ -224,6 +225,18 @@ export default function MapHome() {
                     onClick={handlePinClick}
                   />
                 ))}
+              {location.latitude !== null && (
+                <MapPin
+                  lat={location.latitude}
+                  lng={location.longitude}
+                  data-type="userLocation"
+                  typeOfPin="userLocation"
+                  text="user"
+                  // onClick={handlePinClick}
+                >
+                  USER
+                </MapPin>
+              )}
             </GoogleMapReact>
             <Snapshot
               toggleSnapshot={toggleSnapshot}
@@ -241,28 +254,32 @@ export default function MapHome() {
           {Object.keys(venues).length !== 0 && (
             <>
               <ListOfVenues>
-                <tr>
-                  <th>Venue</th>
-                  <th>Suburb</th>
-                  <th>Address</th>
-                  <th>Date</th>
-                  <th>Time</th>
-                  <th>Alert</th>
-                </tr>
+                <thead>
+                  <tr>
+                    <th>Venue</th>
+                    <th>Suburb</th>
+                    <th>Address</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    {/* <th>Alert</th> */}
+                  </tr>
+                </thead>
                 {isolate.length > 0 &&
                   isolate.map((venue, i) => (
-                    <tr key={`isolate${i}`}>
-                      <td>{venue.Venue}</td>
-                      <td>{venue.Suburb}</td>
-                      <td>{venue.Address}</td>
-                      <td>{venue.Date}</td>
-                      <td>{venue.Time}</td>
-                      <td
+                    <tbody key={`isolate${i}`}>
+                      <tr>
+                        <td>{venue.Venue}</td>
+                        <td>{venue.Suburb}</td>
+                        <td>{venue.Address}</td>
+                        <td>{venue.Date}</td>
+                        <td>{venue.Time}</td>
+                        {/* <td
                         dangerouslySetInnerHTML={{
                           __html: venue.HealthAdviceHTML,
                         }}
-                      />
-                    </tr>
+                      /> */}
+                      </tr>
+                    </tbody>
                   ))}
               </ListOfVenues>
               <TableTitle>
@@ -272,28 +289,32 @@ export default function MapHome() {
                 </h3>
               </TableTitle>
               <ListOfVenues>
-                <tr>
-                  <th>Venue</th>
-                  <th>Suburb</th>
-                  <th>Address</th>
-                  <th>Date</th>
-                  <th>Time</th>
-                  <th>alert</th>
-                </tr>
+                <thead>
+                  <tr>
+                    <th>Venue</th>
+                    <th>Suburb</th>
+                    <th>Address</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    {/* <th>alert</th> */}
+                  </tr>
+                </thead>
                 {monitors.length > 0 &&
                   monitors.map((venue, i) => (
-                    <tr key={`monitor${i}`}>
-                      <td>{venue.Venue}</td>
-                      <td>{venue.Suburb}</td>
-                      <td>{venue.Address}</td>
-                      <td>{venue.Date}</td>
-                      <td>{venue.Time}</td>
-                      <td
+                    <tbody key={`monitor${i}`}>
+                      <tr>
+                        <td>{venue.Venue}</td>
+                        <td>{venue.Suburb}</td>
+                        <td>{venue.Address}</td>
+                        <td>{venue.Date}</td>
+                        <td>{venue.Time}</td>
+                        {/* <td
                         dangerouslySetInnerHTML={{
                           __html: venue.HealthAdviceHTML,
                         }}
-                      />
-                    </tr>
+                      /> */}
+                      </tr>
+                    </tbody>
                   ))}
               </ListOfVenues>
             </>
