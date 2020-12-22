@@ -4,11 +4,12 @@ import Head from 'next/head';
 import Layout from '../components/layout/Layout';
 
 const GlobalStyle = createGlobalStyle`
- 
+ @import url('https://fonts.googleapis.com/css2?family=Dosis:wght@200;400;700&display=swap');
   body,html {
     margin: 0;
     padding: 0;
     font-size: 16px;
+    font-family: 'Dosis', sans-serif;
 }
 * {
     box-sizing: border-box;

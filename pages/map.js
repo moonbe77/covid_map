@@ -23,18 +23,18 @@ const VenuesWrapper = styled.div`
 `;
 
 const ListOfVenues = styled.table`
-  thead {
+  th {
     background-color: black;
     color: white;
     padding: 5px;
   }
-  thead {
+  th {
     height: 40px;
   }
   td {
     padding: 10px 5px;
   }
-  tr:nth-child(2n + 3) {
+  tbody:nth-child(2n + 3) {
     background-color: #e5e5e5;
   }
 `;
@@ -338,10 +338,10 @@ export default function MapHome() {
                     {/* <th>alert</th> */}
                   </tr>
                 </thead>
-                {monitors.length > 0 &&
-                  monitors.map((venue, i) => (
-                    <tbody key={`monitor${i}`}>
-                      <tr>
+                <tbody>
+                  {monitors.length > 0 &&
+                    monitors.map((venue, i) => (
+                      <tr key={`monitor${i}`}>
                         <td>{venue.Venue}</td>
                         <td>{venue.Suburb}</td>
                         <td>{venue.Address}</td>
@@ -353,8 +353,8 @@ export default function MapHome() {
                         }}
                       /> */}
                       </tr>
-                    </tbody>
-                  ))}
+                    ))}
+                </tbody>
               </ListOfVenues>
             </>
           )}
