@@ -34,7 +34,7 @@ const ListOfVenues = styled.table`
   td {
     padding: 10px 5px;
   }
-  tbody:nth-child(2n + 3) {
+  tr:nth-child(2n + 3) {
     background-color: #e5e5e5;
   }
 `;
@@ -303,10 +303,10 @@ export default function MapHome() {
                     {/* <th>Alert</th> */}
                   </tr>
                 </thead>
-                {isolate.length > 0 &&
-                  isolate.map((venue, i) => (
-                    <tbody key={`isolate${i}`}>
-                      <tr>
+                <tbody>
+                  {isolate.length > 0 &&
+                    isolate.map((venue, i) => (
+                      <tr key={`isolate${i}`}>
                         <td>{venue.Venue}</td>
                         <td>{venue.Suburb}</td>
                         <td>{venue.Address}</td>
@@ -318,8 +318,8 @@ export default function MapHome() {
                         }}
                       /> */}
                       </tr>
-                    </tbody>
-                  ))}
+                    ))}
+                </tbody>
               </ListOfVenues>
               <TableTitle>
                 <h3>
