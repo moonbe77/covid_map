@@ -83,7 +83,6 @@ export default function MapHome() {
   const userLocation = useGeolocation();
 
   useEffect(() => {
-    console.log('fetching data');
     fetch(
       'https://data.nsw.gov.au/data/dataset/0a52e6c1-bc0b-48af-8b45-d791a6d8e289/resource/f3a28eed-8c2a-437b-8ac1-2dab3cf760f9/download/venue-data-2020-dec-19-pm.json'
     )
@@ -97,8 +96,6 @@ export default function MapHome() {
   }, []);
 
   useEffect(() => {
-    console.log('data fetched setting states');
-
     if (Object.keys(venues).length !== 0) {
       setIsolate(venues.data.isolate);
       setMonitor(venues.data.monitor);
@@ -113,7 +110,7 @@ export default function MapHome() {
         center: [userLocation.latitude, userLocation.longitude],
       }));
     }
-  }, [userLocation]);
+  }, [venues]);
 
   const getData = (type, index) => {
     switch (type) {
@@ -128,14 +125,14 @@ export default function MapHome() {
   };
 
   const handlePinClick = (e) => {
-    console.log(e.pageX, e.pageY);
+    // console.log(e.pageX, e.pageY);
     const pin = e.target;
     const dataType = pin.dataset.type;
     const { index } = pin.dataset;
     if (!pin) {
       console.log('algo salio mal');
     } else {
-      console.log(getData(dataType, index));
+      // console.log(getData(dataType, index));
       setShowSnapshot(true);
       setVenueSelected(getData(dataType, index));
     }
@@ -146,8 +143,6 @@ export default function MapHome() {
 
   const toggleData = (el) => {
     const target = el.target.value;
-    console.log(target);
-
     target === 'monitor'
       ? setShowMonitors((prevState) => !prevState)
       : setShowIsolate((prevState) => !prevState);
@@ -190,7 +185,7 @@ export default function MapHome() {
   };
 
   const onMapChange = (data) => {
-    console.log('on map change', data);
+    // console.log('on map change', data);
   };
 
   return (
