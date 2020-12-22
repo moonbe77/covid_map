@@ -7,7 +7,7 @@ const SnapshotStyled = styled.div`
   right: 80px;
   max-width: 450px;
   overflow: hidden;
-  padding: 10px;
+  padding: 20px 10px;
   position: absolute;
   top: 10px;
   width: 100%;
@@ -15,10 +15,12 @@ const SnapshotStyled = styled.div`
   border-radius: 8px;
 
   @media (max-width: 680px) {
+    position: absolute;
     max-width: none;
-    top: 5px;
-    right: 5px;
-    width: calc(100vw-10px);
+    top: 50%;
+    width: calc(100vw - 50px);
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 `;
 const VenueTag = styled.div`

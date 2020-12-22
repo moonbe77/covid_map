@@ -51,6 +51,9 @@ const MapBox = styled.div`
   height: 60vh;
   position: relative;
   width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 const MapOptions = styled.div`
@@ -77,7 +80,7 @@ export default function MapHome() {
     center: [-33.63, 151.32],
     zoom: 10,
   });
-  const location = useGeolocation();
+  const userLocation = useGeolocation();
 
   useEffect(() => {
     console.log('fetching data');
@@ -103,7 +106,14 @@ export default function MapHome() {
   }, [venues]);
 
   // TODO: add dynamic centering and zoom of map.
-  useEffect(() => {}, []);
+  useEffect(() => {
+    if (userLocation) {
+      setMapState((prev) => ({
+        ...prev,
+        center: [userLocation.latitude, userLocation.longitude],
+      }));
+    }
+  }, [userLocation]);
 
   const getData = (type, index) => {
     switch (type) {
@@ -259,10 +269,10 @@ export default function MapHome() {
                     onClick={handlePinClick}
                   />
                 ))}
-              {location.latitude !== null && (
+              {userLocation.latitude !== null && (
                 <MapPin
-                  lat={location.latitude}
-                  lng={location.longitude}
+                  lat={userLocation.latitude}
+                  lng={userLocation.longitude}
                   data-type="userLocation"
                   typeOfPin="userLocation"
                   text="user"
