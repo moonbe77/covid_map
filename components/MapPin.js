@@ -1,27 +1,25 @@
 import styled from 'styled-components';
-import { GrLocationPin } from 'react-icons/gr';
-import { AiOutlineMonitor } from 'react-icons/ai';
-import { ImLocation2 } from 'react-icons/im';
+import PropTypes from 'prop-types';
+import { MdLoupe, MdPersonPinCircle, MdAdjust } from 'react-icons/md';
+import { MonitorPin, IsolatePin, UserPin } from './MapPinsComponents';
 
 const MapPinStyled = styled.div`
-  font-size: 1rem;
-  color: gray;
-  height: 30px;
-  position: absolute;
-  text-align: center;
-  width: 30px;
-  top: -15px;
-  left: -15px;
-  transform: 'translate(-50%, -50%)';
+  /* text-align: center; */
+  color: #565454;
   cursor: pointer;
+  font-size: 1rem;
+  height: 18px;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: 'translate(-50%, -50%)';
+  width: 18px;
 
   svg {
     pointer-events: none;
   }
 
   :hover {
-    /* border-radius: 50%; */
-    /* border: 1px solid red; */
     font-size: 1.2rem;
     color: red;
   }
@@ -29,7 +27,6 @@ const MapPinStyled = styled.div`
 
 export default function MapPin(props) {
   const {
-    text,
     typeOfPin,
     onClick,
     'data-index': dataIndex,
@@ -43,9 +40,17 @@ export default function MapPin(props) {
       data-type={dataType}
       typeOfPin={typeOfPin}
     >
-      {typeOfPin === 'monitors' && <AiOutlineMonitor />}
-      {typeOfPin === 'isolate' && <GrLocationPin />}
-      {typeOfPin === 'userLocation' && <ImLocation2 />}
+      {typeOfPin === 'monitors' && <MonitorPin />}
+      {typeOfPin === 'isolate' && <IsolatePin />}
+      {typeOfPin === 'userLocation' && <UserPin />}
     </MapPinStyled>
   );
 }
+
+MapPin.defaultProps = {
+  onClick: null,
+};
+
+MapPin.propTypes = {
+  onClick: PropTypes.func,
+};

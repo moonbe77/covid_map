@@ -5,11 +5,12 @@ import styled from 'styled-components';
 import GoogleMapReact from 'google-map-react';
 import { GrLocationPin } from 'react-icons/gr';
 import { AiOutlineMonitor } from 'react-icons/ai';
+import { MdLoupe, MdPersonPinCircle, MdAdjust } from 'react-icons/md';
 import MapPin from '../components/MapPin';
 import ReturnArrow from '../components/ReturnArrow';
 import Divider from '../components/Divider';
 import Snapshot from '../components/Snapshot';
-import useLocation from '../hook/useLocation';
+import useGeolocation from '../hook/useGeolocation';
 
 const Columns = styled.div`
   display: flex;
@@ -42,7 +43,7 @@ const TableTitle = styled.div`
 `;
 
 const MapWrapper = styled.div`
-  box-shadow: 0 0 7px 0 gray;
+  box-shadow: 0 0 7px -4px gray;
   margin-top: 1rem;
 `;
 
@@ -76,9 +77,8 @@ export default function MapHome() {
     center: [-33.63, 151.32],
     zoom: 10,
   });
+  const location = useGeolocation();
 
-  const location = useLocation();
-  console.log(location);
   useEffect(() => {
     console.log('fetching data');
     fetch(
@@ -153,6 +153,36 @@ export default function MapHome() {
     };
   };
 
+  const _distanceToMouse = (markerPos, mousePos, markerProps) => {
+    // console.log(markerPos);
+    // console.log(mousePos);
+    // console.log(markerProps);
+    const { x } = markerPos;
+    // because of marker non symmetric,
+    // we transform it central point to measure distance from marker circle center
+    // you can change distance function to any other distance measure
+    const { y } = markerPos;
+
+    // and i want that hover probability on markers with text === 'A' be greater than others
+    // so i tweak distance function (for example it's more likely to me that user click on 'A' marker)
+    // another way is to decrease distance for 'A' marker
+    // this is really visible on small zoom values or if there are a lot of markers on the map
+    const distanceKoef = markerProps.text !== 'A' ? 1.5 : 1;
+    // it's just a simple example, you can tweak distance function as you wish
+    const distance =
+      distanceKoef *
+      Math.sqrt(
+        (x - mousePos.x) * (x - mousePos.x) +
+          (y - mousePos.y) * (y - mousePos.y)
+      );
+    // console.log(distance);
+    return distance;
+  };
+
+  const onMapChange = (data) => {
+    console.log('on map change', data);
+  };
+
   return (
     <>
       <Head>
@@ -175,6 +205,7 @@ export default function MapHome() {
                   onChange={toggleData}
                 />
                 Show Monitor Locations
+                <MdAdjust />
               </label>
 
               <label htmlFor="isolate">
@@ -187,6 +218,7 @@ export default function MapHome() {
                   onChange={toggleData}
                 />
                 Show Isolate Locations
+                <MdLoupe />
               </label>
             </ToggleData>
           </MapOptions>
@@ -198,6 +230,8 @@ export default function MapHome() {
               options={createMapOptions}
               center={mapState.center}
               zoom={mapState.zoom}
+              distanceToMouse={_distanceToMouse}
+              onChange={onMapChange}
             >
               {isolate.length > 0 &&
                 showIsolate &&

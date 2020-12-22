@@ -1,12 +1,11 @@
 import styled from 'styled-components';
+import PropTypes from 'prop-types';
 
 const SnapshotStyled = styled.div`
   background-color: white;
   display: ${(props) => (props.isOpen ? 'block' : 'none')};
-  height: 100%;
   right: 80px;
-  min-height: 200px;
-  max-width: 350px;
+  max-width: 450px;
   overflow: hidden;
   padding: 10px;
   position: absolute;
@@ -14,6 +13,13 @@ const SnapshotStyled = styled.div`
   width: 100%;
   box-shadow: 0 0 7px 0px #cdcbcb;
   border-radius: 8px;
+
+  @media (max-width: 680px) {
+    max-width: none;
+    top: 5px;
+    right: 5px;
+    width: calc(100vw-10px);
+  }
 `;
 const VenueTag = styled.div`
   font-size: 1.2rem;
@@ -37,7 +43,11 @@ const Close = styled.div`
   right: 10px;
   cursor: pointer;
   color: gray;
+  font-size: 1.3rem;
   font-weight: 700;
+  :hover {
+    color: black;
+  }
 `;
 const AlertTitle = styled.div`
   color: red;
@@ -50,6 +60,16 @@ const AlertAdvice = styled.div`
 
 export default function Snapshot(props) {
   const { toggleSnapshot } = props;
+  console.log(props);
+
+  if (props.info === null) {
+    return (
+      <SnapshotStyled {...props}>
+        <Close onClick={toggleSnapshot}>X</Close>
+        <h3>DATA NOT RECEIVED</h3>
+      </SnapshotStyled>
+    );
+  }
   const {
     Venue,
     Alert,
@@ -59,6 +79,7 @@ export default function Snapshot(props) {
     Time,
     HealthAdviceHTML,
   } = props.info;
+
   return (
     <SnapshotStyled {...props}>
       <Close onClick={toggleSnapshot}>X</Close>
@@ -76,3 +97,17 @@ export default function Snapshot(props) {
     </SnapshotStyled>
   );
 }
+
+Snapshot.defaultProps = {
+  info: null,
+};
+
+Snapshot.propTypes = {
+  info: PropTypes.object,
+  // Alert: PropTypes.string,
+  // Address: PropTypes.string,
+  // Date: PropTypes.string,
+  // Suburb: PropTypes.string,
+  // Time: PropTypes.string,
+  // HealthAdviceHTML: PropTypes.string,
+};
