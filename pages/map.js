@@ -68,6 +68,10 @@ const ToggleData = styled.div`
   flex-direction: column;
 `;
 
+const callback = (resp, status) => {
+  console.log('distance callback', status, resp);
+};
+
 export default function MapHome() {
   const [venues, setVenues] = useState({});
   const [isolate, setIsolate] = useState([]);
@@ -76,10 +80,12 @@ export default function MapHome() {
   const [showIsolate, setShowIsolate] = useState(true);
   const [showSnapshot, setShowSnapshot] = useState(false);
   const [venueSelected, setVenueSelected] = useState({});
+  const [distance, setDistance] = useState(null); // distance to closest location
   const [mapState, setMapState] = useState({
     center: [-33.63, 151.32],
-    zoom: 10,
+    zoom: 12,
   });
+
   const userLocation = useGeolocation();
 
   useEffect(() => {
@@ -124,6 +130,41 @@ export default function MapHome() {
     }
   };
 
+  const distanceToLocation = () => {
+    console.log('distanceToLocation');
+    const uLocation = {
+      lat: userLocation.latitude,
+      lon: userLocation.longitude,
+    };
+
+    if (userLocation.error != null || Object.keys(venues).length === 0) {
+      return;
+    }
+
+    // go trouhgh the list of venues and find the closest one
+    // console.log(uLocation);
+    // console.log(monitors);
+    const monitorsList = monitors;
+    const threshold = 200;
+    const diff = (userLat, venueLat) => Math.abs(userLat - venueLat);
+
+    const closest = monitorsList.reduce((acc, ven) => {
+      const accValue = diff(uLocation.lat, acc.lat);
+      const newValue = diff(uLocation.lat, ven.lat);
+      return accValue < newValue ? acc : ven;
+    });
+
+    // console.log('closest', closest);
+    return closest;
+  };
+
+  useEffect(() => {
+    if (window.gMaps) {
+      measureDistance();
+    }
+    console.log('from use effect', window.gMaps);
+  }, [userLocation]);
+
   const handlePinClick = (e) => {
     // console.log(e.pageX, e.pageY);
     const pin = e.target;
@@ -137,6 +178,7 @@ export default function MapHome() {
       setVenueSelected(getData(dataType, index));
     }
   };
+
   const toggleSnapshot = () => {
     setShowSnapshot((state) => !state);
   };
@@ -158,34 +200,28 @@ export default function MapHome() {
     };
   };
 
-  const _distanceToMouse = (markerPos, mousePos, markerProps) => {
-    // console.log(markerPos);
-    // console.log(mousePos);
-    // console.log(markerProps);
-    const { x } = markerPos;
-    // because of marker non symmetric,
-    // we transform it central point to measure distance from marker circle center
-    // you can change distance function to any other distance measure
-    const { y } = markerPos;
-
-    // and i want that hover probability on markers with text === 'A' be greater than others
-    // so i tweak distance function (for example it's more likely to me that user click on 'A' marker)
-    // another way is to decrease distance for 'A' marker
-    // this is really visible on small zoom values or if there are a lot of markers on the map
-    const distanceKoef = markerProps.text !== 'A' ? 1.5 : 1;
-    // it's just a simple example, you can tweak distance function as you wish
-    const distance =
-      distanceKoef *
-      Math.sqrt(
-        (x - mousePos.x) * (x - mousePos.x) +
-          (y - mousePos.y) * (y - mousePos.y)
-      );
-    // console.log(distance);
-    return distance;
+  const handleApiLoaded = (map, maps) => {
+    window.gMaps = maps;
   };
 
   const onMapChange = (data) => {
     // console.log('on map change', data);
+  };
+
+  const measureDistance = () => {
+    const p1 = new window.gMaps.LatLng(
+      userLocation.latitude,
+      userLocation.longitude
+    );
+
+    const p2 = new window.gMaps.LatLng(monitors[0].Lat, monitors[0].Lon);
+    console.log(p1, p2);
+
+    const D = (
+      window.gMaps.geometry.spherical.computeDistanceBetween(p1, p2) / 1000
+    ).toFixed(2); // in Km
+
+    setDistance(D);
   };
 
   return (
@@ -194,11 +230,13 @@ export default function MapHome() {
         <title>Map of covid Locations on Sydney</title>
       </Head>
       <ReturnArrow />
+      <h3>COVID MAP</h3>
       <Divider />
       <Columns>
         <MapWrapper>
           <MapOptions>
             <div>Dataset Date: {venues.date}</div>
+            <div>Distance to closest location: {distance || '-'}</div>
             <ToggleData>
               <label htmlFor="monitor">
                 <input
@@ -230,12 +268,14 @@ export default function MapHome() {
           <MapBox>
             <GoogleMapReact
               bootstrapURLKeys={{
+                libraries: ['geometry'],
                 key: process.env.NEXT_PUBLIC_MAPS_API_KEY,
               }}
               options={createMapOptions}
               center={mapState.center}
               zoom={mapState.zoom}
-              distanceToMouse={_distanceToMouse}
+              yesIWantToUseGoogleMapApiInternals
+              onGoogleApiLoaded={({ map, maps }) => handleApiLoaded(map, maps)}
               onChange={onMapChange}
             >
               {isolate.length > 0 &&

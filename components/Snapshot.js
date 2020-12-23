@@ -62,7 +62,6 @@ const AlertAdvice = styled.div`
 
 export default function Snapshot(props) {
   const { toggleSnapshot } = props;
-  console.log(props);
 
   if (props.info === null) {
     return (
