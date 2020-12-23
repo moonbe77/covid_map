@@ -4,8 +4,7 @@ import Head from 'next/head';
 import Layout from '../components/layout/Layout';
 
 const GlobalStyle = createGlobalStyle`
- @import url('https://fonts.googleapis.com/css2?family=Dosis:wght@200;400;700&display=swap');
-  body,html {
+ 
     margin: 0;
     padding: 0;
     font-size: 16px;
@@ -31,6 +30,10 @@ export default function App({ Component, pageProps }) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="icon" href="./covid-19.png" type="image/gif" sizes="16x16" />
         <title>Covid-Map</title>
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Dosis:wght@200;400;700&display=swap"
+        />
         <meta
           name="description"
           content="This is a demo project showing the location of the recent cases

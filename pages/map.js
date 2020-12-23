@@ -11,6 +11,7 @@ import ReturnArrow from '../components/ReturnArrow';
 import Divider from '../components/Divider';
 import Snapshot from '../components/Snapshot';
 import useGeolocation from '../hook/useGeolocation';
+import MapCard from '../components/MapCard';
 
 const Columns = styled.div`
   display: flex;
@@ -80,7 +81,7 @@ export default function MapHome() {
   const [showIsolate, setShowIsolate] = useState(true);
   const [showSnapshot, setShowSnapshot] = useState(false);
   const [venueSelected, setVenueSelected] = useState({});
-  const [distance, setDistance] = useState(null); // distance to closest location
+  const [closestVenue, setClosestVenue] = useState(null); // distance to closest location
   const [mapState, setMapState] = useState({
     center: [-33.63, 151.32],
     zoom: 12,
@@ -130,39 +131,15 @@ export default function MapHome() {
     }
   };
 
-  const distanceToLocation = () => {
-    console.log('distanceToLocation');
-    const uLocation = {
-      lat: userLocation.latitude,
-      lon: userLocation.longitude,
-    };
-
-    if (userLocation.error != null || Object.keys(venues).length === 0) {
-      return;
-    }
-
-    // go trouhgh the list of venues and find the closest one
-    // console.log(uLocation);
-    // console.log(monitors);
-    const monitorsList = monitors;
-    const threshold = 200;
-    const diff = (userLat, venueLat) => Math.abs(userLat - venueLat);
-
-    const closest = monitorsList.reduce((acc, ven) => {
-      const accValue = diff(uLocation.lat, acc.lat);
-      const newValue = diff(uLocation.lat, ven.lat);
-      return accValue < newValue ? acc : ven;
-    });
-
-    // console.log('closest', closest);
-    return closest;
-  };
-
   useEffect(() => {
-    if (window.gMaps) {
+    if (
+      window.gMaps &&
+      userLocation.error === null &&
+      Object.keys(venues).length !== 0
+    ) {
+      // eslint-disable-next-line no-use-before-define
       measureDistance();
     }
-    console.log('from use effect', window.gMaps);
   }, [userLocation]);
 
   const handlePinClick = (e) => {
@@ -213,15 +190,69 @@ export default function MapHome() {
       userLocation.latitude,
       userLocation.longitude
     );
+    const closest = closestLocation();
 
-    const p2 = new window.gMaps.LatLng(monitors[0].Lat, monitors[0].Lon);
-    console.log(p1, p2);
-
+    const p2 = new window.gMaps.LatLng(closest.Lat, closest.Lon);
     const D = (
       window.gMaps.geometry.spherical.computeDistanceBetween(p1, p2) / 1000
     ).toFixed(2); // in Km
 
-    setDistance(D);
+    setClosestVenue({ ...closest, D });
+  };
+
+  const closestLocation = () => {
+    const radians = function (degree) {
+      // degrees to radians
+      const rad = (degree * Math.PI) / 180;
+
+      return rad;
+    };
+    const haversine = (lat1, lon1, lat2, lon2) => {
+      const R = 6372.8; // km
+      const dlat = radians(lat2 - lat1);
+      const dlon = radians(lon2 - lon1);
+      const Lat1 = radians(lat1);
+      const Lat2 = radians(lat2);
+      const a =
+        Math.sin(dlat / 2) * Math.sin(dlat / 2) +
+        Math.sin(dlon / 2) *
+          Math.sin(dlon / 2) *
+          Math.cos(Lat1) *
+          Math.cos(Lat2);
+      const c = 2 * Math.asin(Math.sqrt(a));
+      return R * c;
+    };
+
+    const uLocation = {
+      lat: userLocation.latitude,
+      lon: userLocation.longitude,
+    };
+
+    if (userLocation.error != null || Object.keys(venues).length === 0) {
+      return;
+    }
+
+    const monitorsList = monitors;
+
+    const closest = monitorsList.reduce((acc, ven) => {
+      // console.log('acc', acc);
+      // console.log('ven', ven);
+      const accValue = haversine(
+        uLocation.lat,
+        uLocation.lon,
+        acc.Lat,
+        acc.Lon
+      );
+      const newValue = haversine(
+        uLocation.lat,
+        uLocation.lon,
+        ven.Lat,
+        ven.Lon
+      );
+      return accValue < newValue ? acc : ven;
+    }, {});
+
+    return closest;
   };
 
   return (
@@ -235,34 +266,39 @@ export default function MapHome() {
       <Columns>
         <MapWrapper>
           <MapOptions>
-            <div>Dataset Date: {venues.date}</div>
-            <div>Distance to closest location: {distance || '-'}</div>
+            <MapCard title="Dataset Date"> {venues.date}</MapCard>
+            <MapCard title="Closest Venue">
+              <div>{`${closestVenue.D} km` || '-'}</div>
+              <div>{closestVenue.Venue}</div>
+            </MapCard>
             <ToggleData>
-              <label htmlFor="monitor">
-                <input
-                  type="checkbox"
-                  id="monitor"
-                  name="monitor"
-                  value="monitor"
-                  checked={showMonitors}
-                  onChange={toggleData}
-                />
-                Show Monitor Locations
-                <MdAdjust />
-              </label>
+              <MapCard title="Options">
+                <label htmlFor="monitor">
+                  <input
+                    type="checkbox"
+                    id="monitor"
+                    name="monitor"
+                    value="monitor"
+                    checked={showMonitors}
+                    onChange={toggleData}
+                  />
+                  Show Monitor Locations
+                  <MdAdjust />
+                </label>
 
-              <label htmlFor="isolate">
-                <input
-                  type="checkbox"
-                  id="isolate"
-                  name="isolate"
-                  value="isolate"
-                  checked={showIsolate}
-                  onChange={toggleData}
-                />
-                Show Isolate Locations
-                <MdLoupe />
-              </label>
+                <label htmlFor="isolate">
+                  <input
+                    type="checkbox"
+                    id="isolate"
+                    name="isolate"
+                    value="isolate"
+                    checked={showIsolate}
+                    onChange={toggleData}
+                  />
+                  Show Isolate Locations
+                  <MdLoupe />
+                </label>
+              </MapCard>
             </ToggleData>
           </MapOptions>
           <MapBox>
