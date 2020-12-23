@@ -185,21 +185,6 @@ export default function MapHome() {
     // console.log('on map change', data);
   };
 
-  const measureDistance = () => {
-    const p1 = new window.gMaps.LatLng(
-      userLocation.latitude,
-      userLocation.longitude
-    );
-    const closest = closestLocation();
-
-    const p2 = new window.gMaps.LatLng(closest.Lat, closest.Lon);
-    const D = (
-      window.gMaps.geometry.spherical.computeDistanceBetween(p1, p2) / 1000
-    ).toFixed(2); // in Km
-
-    setClosestVenue({ ...closest, D });
-  };
-
   const closestLocation = () => {
     const radians = function (degree) {
       // degrees to radians
@@ -255,6 +240,21 @@ export default function MapHome() {
     return closest;
   };
 
+  const measureDistance = () => {
+    const p1 = new window.gMaps.LatLng(
+      userLocation.latitude,
+      userLocation.longitude
+    );
+    const closest = closestLocation();
+
+    const p2 = new window.gMaps.LatLng(closest.Lat, closest.Lon);
+    const D = (
+      window.gMaps.geometry.spherical.computeDistanceBetween(p1, p2) / 1000
+    ).toFixed(2); // in Km
+
+    setClosestVenue({ ...closest, D });
+  };
+
   return (
     <>
       <Head>
@@ -268,8 +268,14 @@ export default function MapHome() {
           <MapOptions>
             <MapCard title="Dataset Date"> {venues.date}</MapCard>
             <MapCard title="Closest Venue">
-              <div>{`${closestVenue.D} km` || '-'}</div>
-              <div>{closestVenue.Venue}</div>
+              {closestVenue ? (
+                <>
+                  <div>{`${closestVenue.D} km` || '-'}</div>
+                  <div>{closestVenue.Venue}</div>
+                </>
+              ) : (
+                <div>LOADING</div>
+              )}
             </MapCard>
             <ToggleData>
               <MapCard title="Options">
