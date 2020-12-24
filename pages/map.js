@@ -24,6 +24,8 @@ const VenuesWrapper = styled.div`
 `;
 
 const ListOfVenues = styled.table`
+  max-width: 100%;
+  overflow: hidden;
   th {
     background-color: black;
     color: white;
@@ -60,9 +62,11 @@ const MapBox = styled.div`
 const MapOptions = styled.div`
   align-items: center;
   display: flex;
+  flex-wrap: wrap;
   flex-direction: row;
   justify-content: space-around;
   padding: 1em;
+  gap: 1rem;
 `;
 const ToggleData = styled.div`
   display: flex;
