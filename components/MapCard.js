@@ -1,24 +1,30 @@
 import styled from 'styled-components';
 
 const CardStyled = styled.div`
-  position: relative;
+  align-items: center;
+  border-radius: 8px;
+  box-shadow: 0 0 7px -3px gray;
+  color: gray;
   display: flex;
   flex-direction: column;
-  padding: 2rem;
-  justify-content: space-around;
-  align-items: center;
-  color: gray;
-  box-shadow: 0 0 7px -3px gray;
-  border-radius: 8px;
-  min-width: 250px;
-  height: 150px;
+  justify-content: center;
+  padding: 1rem;
+  position: relative;
+  height: 160px;
+  min-width: 160px;
+  flex: 1;
+
+  @media (max-width: 680px) {
+    padding: 10px;
+    flex: 1;
+  }
 `;
 
 const CardHeader = styled.div`
-  display: block;
   font-size: 1.1rem;
   flex: 1;
 `;
+
 const CardBody = styled.div`
   display: flex;
   flex-direction: column;
@@ -27,6 +33,7 @@ const CardBody = styled.div`
   font-size: 1.2rem;
   flex: 2;
   font-weight: 700;
+  text-align: center;
 `;
 
 export default function MapCard({ children, title }) {

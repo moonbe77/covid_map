@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-no-bind */
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import styled from 'styled-components';
@@ -72,10 +71,6 @@ const ToggleData = styled.div`
   display: flex;
   flex-direction: column;
 `;
-
-const callback = (resp, status) => {
-  console.log('distance callback', status, resp);
-};
 
 export default function MapHome() {
   const [venues, setVenues] = useState({});
@@ -221,9 +216,9 @@ export default function MapHome() {
       return;
     }
 
-    const monitorsList = monitors;
+    const venuesList = [...monitors, ...isolate];
 
-    const closest = monitorsList.reduce((acc, ven) => {
+    const closest = venuesList.reduce((acc, ven) => {
       // console.log('acc', acc);
       // console.log('ven', ven);
       const accValue = haversine(
@@ -281,35 +276,33 @@ export default function MapHome() {
                 <div>LOADING</div>
               )}
             </MapCard>
-            <ToggleData>
-              <MapCard title="Options">
-                <label htmlFor="monitor">
-                  <input
-                    type="checkbox"
-                    id="monitor"
-                    name="monitor"
-                    value="monitor"
-                    checked={showMonitors}
-                    onChange={toggleData}
-                  />
-                  Show Monitor Locations
-                  <MdAdjust />
-                </label>
+            <MapCard title="Options">
+              <label htmlFor="monitor">
+                <input
+                  type="checkbox"
+                  id="monitor"
+                  name="monitor"
+                  value="monitor"
+                  checked={showMonitors}
+                  onChange={toggleData}
+                />
+                Show Monitor Locations
+                <MdAdjust />
+              </label>
 
-                <label htmlFor="isolate">
-                  <input
-                    type="checkbox"
-                    id="isolate"
-                    name="isolate"
-                    value="isolate"
-                    checked={showIsolate}
-                    onChange={toggleData}
-                  />
-                  Show Isolate Locations
-                  <MdLoupe />
-                </label>
-              </MapCard>
-            </ToggleData>
+              <label htmlFor="isolate">
+                <input
+                  type="checkbox"
+                  id="isolate"
+                  name="isolate"
+                  value="isolate"
+                  checked={showIsolate}
+                  onChange={toggleData}
+                />
+                Show Isolate Locations
+                <MdLoupe />
+              </label>
+            </MapCard>
           </MapOptions>
           <MapBox>
             <GoogleMapReact
