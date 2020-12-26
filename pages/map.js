@@ -106,8 +106,8 @@ export default function MapHome({ venues }) {
       const newValue = haversine(
         uLocation.lat,
         uLocation.lon,
-        ven.Lat,
-        ven.Lon
+        ven.Lat.split(',')[0],
+        ven.Lon.split(',')[0]
       );
       return accValue < newValue ? acc : ven;
     }, {});
@@ -171,6 +171,7 @@ export default function MapHome({ venues }) {
       setVenuesTypeFilter((prevState) => [...prevState, target]);
     }
   };
+
   return (
     <>
       <Head>
