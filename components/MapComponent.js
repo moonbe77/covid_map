@@ -54,10 +54,17 @@ export default function MapComponent({ markers, venuesTypeFilter }) {
   const toggleSnapshot = () => {
     setShowSnapshot((state) => !state);
   };
+
   useEffect(() => {
-    const venuesFiltered = markers.filter(
-      (ven) => ven.venueType === venuesTypeFilter[0]
-    );
+    // FIXME: make this to work with an array of filters
+
+    const venuesFiltered = [];
+    venuesTypeFilter.forEach((element) => {
+      const filtered = markers.filter((ven) => ven.venueType === element);
+      console.log(element);
+      venuesFiltered.push(...filtered);
+    });
+
     setMarkersOnMap(venuesFiltered);
   }, [markers, venuesTypeFilter]);
 
@@ -77,7 +84,6 @@ export default function MapComponent({ markers, venuesTypeFilter }) {
       </MapWrapper>
     );
   }
-  console.log('markers on mapp', markersOnMap);
   const handlePinClick = (e) => {
     const pin = e.target;
     const dataType = pin.dataset.type;
@@ -110,8 +116,8 @@ export default function MapComponent({ markers, venuesTypeFilter }) {
             markersOnMap.map((venue, i) => (
               <MapPin
                 key={`marker-${i}`}
-                lat={venue.Lat}
-                lng={venue.Lon}
+                lat={venue.Lat.split(',')[0]}
+                lng={venue.Lon.split(',')[0]}
                 data-index={i}
                 data-type={venue.venueType}
                 typeOfPin={venue.venueType} // get type from list
@@ -141,10 +147,6 @@ export default function MapComponent({ markers, venuesTypeFilter }) {
     </MapWrapper>
   );
 }
-
-Map.defaultProps = {
-  onClick: null,
-};
 
 Map.propTypes = {
   markers: PropTypes.array,

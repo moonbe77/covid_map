@@ -133,7 +133,8 @@ export default function MapHome({ venues }) {
   useEffect(() => {
     if (venues.data.length > 0) {
       const types = [];
-      venues.data.map((ven) => {
+
+      venues.data.forEach((ven) => {
         if (types.length === 0) {
           types.push(ven.venueType);
           return;
@@ -141,6 +142,7 @@ export default function MapHome({ venues }) {
 
         types.includes(ven.venueType) === false && types.push(ven.venueType);
       });
+
       setVenuesTypes(types);
     }
   }, [venues]);
@@ -169,7 +171,6 @@ export default function MapHome({ venues }) {
       setVenuesTypeFilter((prevState) => [...prevState, target]);
     }
   };
-  console.log(venuesTypeFilter);
   return (
     <>
       <Head>
