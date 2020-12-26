@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import styled from 'styled-components';
-import GoogleMapReact from 'google-map-react';
 import { GrLocationPin } from 'react-icons/gr';
 import { AiOutlineMonitor } from 'react-icons/ai';
 import { MdLoupe, MdAdjust } from 'react-icons/md';
-import MapPin from '../components/MapPin';
 import ReturnArrow from '../components/ReturnArrow';
 import Divider from '../components/Divider';
-import Snapshot from '../components/Snapshot';
 import useGeolocation from '../hook/useGeolocation';
 import MapCard from '../components/MapCard';
+import MapComponent from '../components/MapComponent';
 
 const Columns = styled.div`
   display: flex;
@@ -67,19 +65,13 @@ const MapOptions = styled.div`
   padding: 1em;
   gap: 1rem;
 `;
-const ToggleData = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
 
-export default function MapHome() {
-  const [venues, setVenues] = useState({});
+export default function MapHome({ venues }) {
   const [isolate, setIsolate] = useState([]);
   const [monitors, setMonitor] = useState([]);
   const [showMonitors, setShowMonitors] = useState(true);
   const [showIsolate, setShowIsolate] = useState(true);
-  const [showSnapshot, setShowSnapshot] = useState(false);
-  const [venueSelected, setVenueSelected] = useState({});
+
   const [closestVenue, setClosestVenue] = useState(null); // distance to closest location
   const [mapState, setMapState] = useState({
     center: [-33.63, 151.32],
@@ -87,105 +79,6 @@ export default function MapHome() {
   });
 
   const userLocation = useGeolocation();
-
-  useEffect(() => {
-    fetch(
-      'https://data.nsw.gov.au/data/dataset/0a52e6c1-bc0b-48af-8b45-d791a6d8e289/resource/f3a28eed-8c2a-437b-8ac1-2dab3cf760f9/download/venue-data-2020-dec-19-pm.json'
-    )
-      .then((res) => res.json())
-      .then((res) => {
-        setVenues(res);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
-
-  useEffect(() => {
-    if (Object.keys(venues).length !== 0) {
-      console.log(venues);
-
-      setIsolate(venues.data.isolate || []);
-      setMonitor(venues.data.monitor || []);
-    }
-  }, [venues]);
-
-  // TODO: add dynamic centering and zoom of map.
-  useEffect(() => {
-    if (userLocation) {
-      setMapState((prev) => ({
-        ...prev,
-        center: [userLocation.latitude, userLocation.longitude],
-      }));
-    }
-  }, [venues]);
-
-  const getData = (type, index) => {
-    switch (type) {
-      case 'monitor':
-        return monitors[index];
-      case 'isolate':
-        return isolate[index];
-
-      default:
-        break;
-    }
-  };
-
-  useEffect(() => {
-    if (
-      window.gMaps &&
-      userLocation.error === null &&
-      Object.keys(venues).length !== 0
-    ) {
-      // eslint-disable-next-line no-use-before-define
-      measureDistance();
-    }
-  }, [userLocation]);
-
-  const handlePinClick = (e) => {
-    // console.log(e.pageX, e.pageY);
-    const pin = e.target;
-    const dataType = pin.dataset.type;
-    const { index } = pin.dataset;
-    if (!pin) {
-      console.log('algo salio mal');
-    } else {
-      // console.log(getData(dataType, index));
-      setVenueSelected(getData(dataType, index));
-      setShowSnapshot(true);
-    }
-  };
-
-  const toggleSnapshot = () => {
-    setShowSnapshot((state) => !state);
-  };
-
-  const toggleData = (el) => {
-    const target = el.target.value;
-    target === 'monitor'
-      ? setShowMonitors((prevState) => !prevState)
-      : setShowIsolate((prevState) => !prevState);
-  };
-
-  const createMapOptions = function (maps) {
-    return {
-      panControl: true,
-      mapTypeControl: true,
-      scrollwheel: true,
-      zoom: mapState.zoom,
-      center: mapState.center,
-    };
-  };
-
-  const handleApiLoaded = (map, maps) => {
-    window.gMaps = maps;
-  };
-
-  const onMapChange = (data) => {
-    // console.log('on map change', data);
-  };
-
   const closestLocation = () => {
     const radians = function (degree) {
       // degrees to radians
@@ -256,6 +149,50 @@ export default function MapHome() {
     setClosestVenue({ ...closest, D });
   };
 
+  useEffect(() => {
+    if (Object.keys(venues).length !== 0) {
+      console.log(venues);
+
+      setIsolate(venues.data.isolate || []);
+      setMonitor(venues.data.monitor || []);
+    }
+  }, [venues]);
+
+  useEffect(() => {
+    if (
+      window.gMaps &&
+      userLocation.error === null &&
+      Object.keys(venues).length !== 0
+    ) {
+      measureDistance();
+    }
+  }, [userLocation, venues]);
+
+  const toggleData = (el) => {
+    const target = el.target.value;
+    target === 'monitor'
+      ? setShowMonitors((prevState) => !prevState)
+      : setShowIsolate((prevState) => !prevState);
+  };
+
+  const createMapOptions = function () {
+    return {
+      panControl: true,
+      mapTypeControl: true,
+      scrollwheel: true,
+      zoom: mapState.zoom,
+      center: mapState.center,
+    };
+  };
+
+  const handleApiLoaded = (map, maps) => {
+    window.gMaps = maps;
+  };
+
+  const onMapChange = (data) => {
+    // console.log('on map change', data);
+  };
+
   return (
     <>
       <Head>
@@ -265,104 +202,45 @@ export default function MapHome() {
       <h3>COVID MAP</h3>
       <Divider />
       <Columns>
-        <MapWrapper>
-          <MapOptions>
-            <MapCard title="Dataset Date"> {venues.date}</MapCard>
-            <MapCard title="Closest Venue">
-              {closestVenue ? (
-                <>
-                  <div>{`${closestVenue.D} km` || '-'}</div>
-                  <div>{closestVenue.Venue}</div>
-                </>
-              ) : (
-                <div>LOADING</div>
-              )}
-            </MapCard>
-            <MapCard title="Options">
-              <label htmlFor="monitor">
-                <input
-                  type="checkbox"
-                  id="monitor"
-                  name="monitor"
-                  value="monitor"
-                  checked={showMonitors}
-                  onChange={toggleData}
-                />
-                Monitor ( {monitors.length} ) <MdAdjust />
-              </label>
+        <MapOptions>
+          <MapCard title="Dataset Date"> {venues.date}</MapCard>
+          <MapCard title="Closest Venue">
+            {closestVenue ? (
+              <>
+                <div>{`${closestVenue.D} km` || '-'}</div>
+                <div>{closestVenue.Venue}</div>
+              </>
+            ) : (
+              <div>LOADING</div>
+            )}
+          </MapCard>
+          <MapCard title="Options">
+            <label htmlFor="monitor">
+              <input
+                type="checkbox"
+                id="monitor"
+                name="monitor"
+                value="monitor"
+                checked={showMonitors}
+                onChange={toggleData}
+              />
+              Monitor ( {monitors.length} ) <MdAdjust />
+            </label>
 
-              <label htmlFor="isolate">
-                <input
-                  type="checkbox"
-                  id="isolate"
-                  name="isolate"
-                  value="isolate"
-                  checked={showIsolate}
-                  onChange={toggleData}
-                />
-                Isolate ( {isolate.length} ) <MdLoupe />
-              </label>
-            </MapCard>
-          </MapOptions>
-          <MapBox>
-            <GoogleMapReact
-              bootstrapURLKeys={{
-                libraries: ['geometry'],
-                key: process.env.NEXT_PUBLIC_MAPS_API_KEY,
-              }}
-              options={createMapOptions}
-              center={mapState.center}
-              zoom={mapState.zoom}
-              yesIWantToUseGoogleMapApiInternals
-              onGoogleApiLoaded={({ map, maps }) => handleApiLoaded(map, maps)}
-              onChange={onMapChange}
-            >
-              {isolate.length > 0 &&
-                showIsolate &&
-                isolate.map((venue, i) => (
-                  <MapPin
-                    key={`isolate-${i}`}
-                    lat={venue.Lat}
-                    lng={venue.Lon}
-                    data-index={i}
-                    data-type="isolate"
-                    typeOfPin="isolate"
-                    onClick={handlePinClick}
-                  />
-                ))}
-              {monitors.length > 0 &&
-                showMonitors &&
-                monitors.map((venue, i) => (
-                  <MapPin
-                    key={`monitor-${i}`}
-                    lat={venue.Lat}
-                    lng={venue.Lon}
-                    data-index={i}
-                    data-type="monitor"
-                    typeOfPin="monitors"
-                    onClick={handlePinClick}
-                  />
-                ))}
-              {userLocation.latitude !== null && (
-                <MapPin
-                  lat={userLocation.latitude}
-                  lng={userLocation.longitude}
-                  data-type="userLocation"
-                  typeOfPin="userLocation"
-                  text="user"
-                  // onClick={handlePinClick}
-                >
-                  USER
-                </MapPin>
-              )}
-            </GoogleMapReact>
-            <Snapshot
-              toggleSnapshot={toggleSnapshot}
-              isOpen={showSnapshot}
-              info={venueSelected}
-            />
-          </MapBox>
-        </MapWrapper>
+            <label htmlFor="isolate">
+              <input
+                type="checkbox"
+                id="isolate"
+                name="isolate"
+                value="isolate"
+                checked={showIsolate}
+                onChange={toggleData}
+              />
+              Isolate ( {isolate.length} ) <MdLoupe />
+            </label>
+          </MapCard>
+        </MapOptions>
+        <MapComponent markers={venues.data.monitor} userLocation={userLocation} />
         <VenuesWrapper>
           <TableTitle>
             <h3>
@@ -443,8 +321,18 @@ export default function MapHome() {
   );
 }
 
-export async function getServerSideProps(context) {
+export async function getServerSideProps() {
+  const fetchVenues = await fetch(
+    'https://data.nsw.gov.au/data/dataset/0a52e6c1-bc0b-48af-8b45-d791a6d8e289/resource/f3a28eed-8c2a-437b-8ac1-2dab3cf760f9/download/venue-data-2020-dec-19-pm.json'
+  ).then((res) => res.json());
+
+  if (!fetchVenues) {
+    return {
+      notFound: true,
+    };
+  }
+
   return {
-    props: {}, // will be passed to the page component as props
+    props: { venues: fetchVenues }, // will be passed to the page component as props
   };
 }

@@ -1,5 +1,10 @@
 import styled from 'styled-components';
-import { MdLoupe, MdPersonPinCircle, MdAdjust } from 'react-icons/md';
+import {
+  MdLoupe,
+  MdPersonPinCircle,
+  MdAdjust,
+  MdPanoramaFishEye,
+} from 'react-icons/md';
 
 const MasterPin = styled.div`
   pointer-events: none;
@@ -30,5 +35,11 @@ export const IsolatePin = () => (
 export const UserPin = () => (
   <UserLocation>
     <MdPersonPinCircle />
+  </UserLocation>
+);
+
+export const DefaultPin = () => (
+  <UserLocation>
+    <MdPanoramaFishEye />
   </UserLocation>
 );

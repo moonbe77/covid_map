@@ -1,7 +1,11 @@
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { MdLoupe, MdPersonPinCircle, MdAdjust } from 'react-icons/md';
-import { MonitorPin, IsolatePin, UserPin } from './MapPinsComponents';
+import {
+  MonitorPin,
+  IsolatePin,
+  UserPin,
+  DefaultPin,
+} from './MapPinsComponents';
 
 const MapPinStyled = styled.div`
   /* text-align: center; */
@@ -40,9 +44,12 @@ export default function MapPin(props) {
       data-type={dataType}
       typeOfPin={typeOfPin}
     >
-      {typeOfPin === 'monitors' && <MonitorPin />}
+      {typeOfPin === 'monitor' && <MonitorPin />}
       {typeOfPin === 'isolate' && <IsolatePin />}
       {typeOfPin === 'userLocation' && <UserPin />}
+      {typeOfPin !== 'monitor' ||
+        typeOfPin !== 'isolate' ||
+        (typeOfPin !== 'userLocation' && <DefaultPin />)}
     </MapPinStyled>
   );
 }
@@ -52,5 +59,8 @@ MapPin.defaultProps = {
 };
 
 MapPin.propTypes = {
+  typeOfPin: PropTypes.string,
+  'data-index': PropTypes.number,
+  'data-type': PropTypes.string,
   onClick: PropTypes.func,
 };
