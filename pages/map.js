@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import styled from 'styled-components';
@@ -53,19 +54,13 @@ const MapOptions = styled.div`
 `;
 
 export default function MapHome({ venues }) {
-  const [isolate, setIsolate] = useState([]);
-  const [monitors, setMonitor] = useState([]);
-  const [showMonitors, setShowMonitors] = useState(true);
-  const [showIsolate, setShowIsolate] = useState(true);
-
+  const [venuesTypes, setVenuesTypes] = useState([]);
+  const [venuesTypeFilter, setVenuesTypeFilter] = useState([]);
   const [closestVenue, setClosestVenue] = useState(null); // distance to closest location
-  const [mapState, setMapState] = useState({
-    center: [-33.63, 151.32],
-    zoom: 12,
-  });
 
   const userLocation = useGeolocation();
   const closestLocation = () => {
+    // return the closest venue to the user location
     const radians = function (degree) {
       // degrees to radians
       const rad = (degree * Math.PI) / 180;
@@ -97,7 +92,7 @@ export default function MapHome({ venues }) {
       return;
     }
 
-    const venuesList = [...monitors, ...isolate];
+    const venuesList = venues.data;
 
     const closest = venuesList.reduce((acc, ven) => {
       // console.log('acc', acc);
@@ -136,49 +131,45 @@ export default function MapHome({ venues }) {
   };
 
   useEffect(() => {
-    if (Object.keys(venues).length !== 0) {
-      console.log(venues);
+    if (venues.data.length > 0) {
+      const types = [];
+      venues.data.map((ven) => {
+        if (types.length === 0) {
+          types.push(ven.venueType);
+          return;
+        }
 
-      setIsolate(venues.data.isolate || []);
-      setMonitor(venues.data.monitor || []);
+        types.includes(ven.venueType) === false && types.push(ven.venueType);
+      });
+      setVenuesTypes(types);
     }
   }, [venues]);
+
+  useEffect(() => {
+    setVenuesTypeFilter(venuesTypes);
+  }, [venuesTypes]);
 
   useEffect(() => {
     if (
       window.gMaps &&
       userLocation.error === null &&
-      Object.keys(venues).length !== 0
+      Object.keys(venues.data).length !== 0
     ) {
       measureDistance();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userLocation, venues]);
 
   const toggleData = (el) => {
     const target = el.target.value;
-    target === 'monitor'
-      ? setShowMonitors((prevState) => !prevState)
-      : setShowIsolate((prevState) => !prevState);
+    console.log(target);
+    if (venuesTypeFilter.includes(target)) {
+      setVenuesTypeFilter(venuesTypeFilter.filter((e) => e !== target));
+    } else {
+      setVenuesTypeFilter((prevState) => [...prevState, target]);
+    }
   };
-
-  const createMapOptions = function () {
-    return {
-      panControl: true,
-      mapTypeControl: true,
-      scrollwheel: true,
-      zoom: mapState.zoom,
-      center: mapState.center,
-    };
-  };
-
-  const handleApiLoaded = (map, maps) => {
-    window.gMaps = maps;
-  };
-
-  const onMapChange = (data) => {
-    // console.log('on map change', data);
-  };
-
+  console.log(venuesTypeFilter);
   return (
     <>
       <Head>
@@ -202,34 +193,27 @@ export default function MapHome({ venues }) {
             )}
           </MapCard>
           <MapCard title="Options">
-            <label htmlFor="monitor">
-              <input
-                type="checkbox"
-                id="monitor"
-                name="monitor"
-                value="monitor"
-                checked={showMonitors}
-                onChange={toggleData}
-              />
-              Monitor ( {monitors.length} ) <MdAdjust />
-            </label>
-
-            <label htmlFor="isolate">
-              <input
-                type="checkbox"
-                id="isolate"
-                name="isolate"
-                value="isolate"
-                checked={showIsolate}
-                onChange={toggleData}
-              />
-              Isolate ( {isolate.length} ) <MdLoupe />
-            </label>
+            {venuesTypes.map((type) => (
+              <label key={type} htmlFor={type}>
+                <input
+                  type="checkbox"
+                  id={type}
+                  name={type}
+                  value={type}
+                  onChange={toggleData}
+                  checked={venuesTypeFilter.includes(type)}
+                />
+                {type} ({' '}
+                {venues.data.filter((ven) => ven.venueType === type).length} ){' '}
+                <MdAdjust />
+              </label>
+            ))}
           </MapCard>
         </MapOptions>
         <MapComponent
-          markers={venues.data.monitor}
+          markers={venues.data}
           userLocation={userLocation}
+          venuesTypeFilter={venuesTypeFilter}
         />
         <VenuesWrapper>
           <TableTitle>
@@ -239,40 +223,8 @@ export default function MapHome({ venues }) {
           </TableTitle>
           {Object.keys(venues).length !== 0 && (
             <>
-              <ListOfVenues>
-                <thead>
-                  <tr>
-                    <th>Venue</th>
-                    <th>Suburb</th>
-                    <th>Address</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    {/* <th>Alert</th> */}
-                  </tr>
-                </thead>
-                <tbody>
-                  {isolate.length > 0 &&
-                    isolate.map((venue, i) => (
-                      <tr key={`isolate${i}`}>
-                        <td>{venue.Venue}</td>
-                        <td>{venue.Suburb}</td>
-                        <td>{venue.Address}</td>
-                        <td>{venue.Date}</td>
-                        <td>{venue.Time}</td>
-                        {/* <td
-                        dangerouslySetInnerHTML={{
-                          __html: venue.HealthAdviceHTML,
-                        }}
-                      /> */}
-                      </tr>
-                    ))}
-                </tbody>
-              </ListOfVenues>
               <TableTitle>
-                <h3>
-                  <AiOutlineMonitor />
-                  Monitor
-                </h3>
+                <h3>Venues</h3>
               </TableTitle>
               <ListOfVenues>
                 <thead>
@@ -286,8 +238,8 @@ export default function MapHome({ venues }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {monitors.length > 0 &&
-                    monitors.map((venue, i) => (
+                  {venues.data.length > 0 &&
+                    venues.data.map((venue, i) => (
                       <tr key={`monitor${i}`}>
                         <td>{venue.Venue}</td>
                         <td>{venue.Suburb}</td>
@@ -321,9 +273,28 @@ export async function getStaticProps() {
       notFound: true,
     };
   }
+  // get all the venues coming from the api [venus.data] and put all together with an extra key with the type of data
+
+  const venuesParsed = [];
+  // eslint-disable-next-line no-restricted-syntax
+  for (const key in fetchVenues.data) {
+    if (Object.prototype.hasOwnProperty.call(fetchVenues.data, key)) {
+      // grab every key from venues.data and put the venue type (key) inside the venue data
+      const venuesWithTypeOfVenue = fetchVenues.data[key].map((venue) => ({
+        ...venue,
+        venueType: key,
+      }));
+      venuesParsed.push(...venuesWithTypeOfVenue);
+    }
+  }
+
+  const venues = {
+    date: fetchVenues.date,
+    data: venuesParsed,
+  };
 
   return {
-    props: { venues: fetchVenues }, // will be passed to the page component as props
+    props: { venues }, // will be passed to the page component as props
     revalidate: 1,
   };
 }

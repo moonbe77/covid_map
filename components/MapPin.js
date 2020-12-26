@@ -47,9 +47,9 @@ export default function MapPin(props) {
       {typeOfPin === 'monitor' && <MonitorPin />}
       {typeOfPin === 'isolate' && <IsolatePin />}
       {typeOfPin === 'userLocation' && <UserPin />}
-      {typeOfPin !== 'monitor' ||
-        typeOfPin !== 'isolate' ||
-        (typeOfPin !== 'userLocation' && <DefaultPin />)}
+      {typeOfPin !== 'monitor' &&
+        typeOfPin !== 'isolate' &&
+        typeOfPin !== 'userLocation' && <DefaultPin />}
     </MapPinStyled>
   );
 }

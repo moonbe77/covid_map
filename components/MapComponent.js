@@ -20,26 +20,21 @@ const MapBox = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
 `;
 const Loading = styled.div`
   width: 100px;
   margin: 6rem auto;
 `;
 
-export default function MapComponent({ markers }) {
-  if (markers.length === 0) {
-    return (
-      <MapWrapper>
-        <Loading>loading...</Loading>
-      </MapWrapper>
-    );
-  }
-  const [showSnapshot, setShowSnapshot] = useState(false);
+export default function MapComponent({ markers, venuesTypeFilter }) {
   const [venueSelected, setVenueSelected] = useState({});
+  const [markersOnMap, setMarkersOnMap] = useState([]);
   const [mapState, setMapState] = useState({
     center: [-33.79, 151.29],
     zoom: 12,
   });
+  const [showSnapshot, setShowSnapshot] = useState(false);
   const userLocation = useGeolocation();
 
   const createMapOptions = function () {
@@ -59,11 +54,15 @@ export default function MapComponent({ markers }) {
   const toggleSnapshot = () => {
     setShowSnapshot((state) => !state);
   };
+  useEffect(() => {
+    const venuesFiltered = markers.filter(
+      (ven) => ven.venueType === venuesTypeFilter[0]
+    );
+    setMarkersOnMap(venuesFiltered);
+  }, [markers, venuesTypeFilter]);
 
-  // TODO: center map with user location/
   useEffect(() => {
     if (userLocation.latitude !== null) {
-      console.log(userLocation);
       setMapState((prev) => ({
         ...prev,
         center: [userLocation.latitude, userLocation.longitude],
@@ -71,8 +70,15 @@ export default function MapComponent({ markers }) {
     }
   }, []);
 
+  if (markers.length === 0) {
+    return (
+      <MapWrapper>
+        <Loading>loading...</Loading>
+      </MapWrapper>
+    );
+  }
+  console.log('markers on mapp', markersOnMap);
   const handlePinClick = (e) => {
-    // console.log(e.pageX, e.pageY);
     const pin = e.target;
     const dataType = pin.dataset.type;
     const { index } = pin.dataset;
@@ -100,15 +106,15 @@ export default function MapComponent({ markers }) {
           yesIWantToUseGoogleMapApiInternals
           onGoogleApiLoaded={({ map, maps }) => handleApiLoaded(map, maps)}
         >
-          {markers.length > 0 &&
-            markers.map((venue, i) => (
+          {markersOnMap.length > 0 &&
+            markersOnMap.map((venue, i) => (
               <MapPin
                 key={`marker-${i}`}
                 lat={venue.Lat}
                 lng={venue.Lon}
                 data-index={i}
-                data-type="monitor"
-                typeOfPin="monitor" // get type from list
+                data-type={venue.venueType}
+                typeOfPin={venue.venueType} // get type from list
                 onClick={handlePinClick}
               />
             ))}
@@ -143,4 +149,5 @@ Map.defaultProps = {
 Map.propTypes = {
   markers: PropTypes.array,
   userLocation: PropTypes.object,
+  venuesTypeFilter: PropTypes.array,
 };

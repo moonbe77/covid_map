@@ -1,3 +1,4 @@
+/* eslint-disable allowTernary */
 import styled from 'styled-components';
 import {
   MdLoupe,
@@ -16,6 +17,10 @@ const Isolate = styled(MasterPin)`
   color: red;
 `;
 const UserLocation = styled(MasterPin)`
+  color: gray;
+  font-size: 1.5em;
+`;
+const Default = styled(MasterPin)`
   color: gray;
   font-size: 1.5em;
 `;
@@ -39,7 +44,7 @@ export const UserPin = () => (
 );
 
 export const DefaultPin = () => (
-  <UserLocation>
+  <Default>
     <MdPanoramaFishEye />
-  </UserLocation>
+  </Default>
 );

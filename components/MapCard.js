@@ -10,7 +10,7 @@ const CardStyled = styled.div`
   justify-content: center;
   padding: 1rem;
   position: relative;
-  height: 160px;
+  height: 100px;
   min-width: 160px;
   flex: 1;
 
