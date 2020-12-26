@@ -42,20 +42,6 @@ const TableTitle = styled.div`
   text-align: center;
 `;
 
-const MapWrapper = styled.div`
-  box-shadow: 0 0 7px -4px gray;
-  margin-top: 1rem;
-`;
-
-const MapBox = styled.div`
-  height: 60vh;
-  position: relative;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
 const MapOptions = styled.div`
   align-items: center;
   display: flex;
@@ -240,7 +226,10 @@ export default function MapHome({ venues }) {
             </label>
           </MapCard>
         </MapOptions>
-        <MapComponent markers={venues.data.monitor} userLocation={userLocation} />
+        <MapComponent
+          markers={venues.data.monitor}
+          userLocation={userLocation}
+        />
         <VenuesWrapper>
           <TableTitle>
             <h3>
@@ -321,7 +310,7 @@ export default function MapHome({ venues }) {
   );
 }
 
-export async function getServerSideProps() {
+export async function getStaticProps() {
   const fetchVenues = await fetch(
     'https://data.nsw.gov.au/data/dataset/0a52e6c1-bc0b-48af-8b45-d791a6d8e289/resource/f3a28eed-8c2a-437b-8ac1-2dab3cf760f9/download/venue-data-2020-dec-19-pm.json'
   ).then((res) => res.json());
@@ -334,5 +323,6 @@ export async function getServerSideProps() {
 
   return {
     props: { venues: fetchVenues }, // will be passed to the page component as props
+    revalidate: 1,
   };
 }

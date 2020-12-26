@@ -21,8 +21,19 @@ const MapBox = styled.div`
   justify-content: center;
   align-items: center;
 `;
+const Loading = styled.div`
+  width: 100px;
+  margin: 6rem auto;
+`;
 
 export default function MapComponent({ markers }) {
+  if (markers.length === 0) {
+    return (
+      <MapWrapper>
+        <Loading>loading...</Loading>
+      </MapWrapper>
+    );
+  }
   const [showSnapshot, setShowSnapshot] = useState(false);
   const [venueSelected, setVenueSelected] = useState({});
   const [mapState, setMapState] = useState({
