@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import GoogleMapReact from 'google-map-react';
 import { GrLocationPin } from 'react-icons/gr';
 import { AiOutlineMonitor } from 'react-icons/ai';
-import { MdLoupe, MdPersonPinCircle, MdAdjust } from 'react-icons/md';
+import { MdLoupe, MdAdjust } from 'react-icons/md';
 import MapPin from '../components/MapPin';
 import ReturnArrow from '../components/ReturnArrow';
 import Divider from '../components/Divider';
@@ -103,8 +103,10 @@ export default function MapHome() {
 
   useEffect(() => {
     if (Object.keys(venues).length !== 0) {
-      setIsolate(venues.data.isolate);
-      setMonitor(venues.data.monitor);
+      console.log(venues);
+
+      setIsolate(venues.data.isolate || []);
+      setMonitor(venues.data.monitor || []);
     }
   }, [venues]);
 
@@ -150,8 +152,8 @@ export default function MapHome() {
       console.log('algo salio mal');
     } else {
       // console.log(getData(dataType, index));
-      setShowSnapshot(true);
       setVenueSelected(getData(dataType, index));
+      setShowSnapshot(true);
     }
   };
 
@@ -286,8 +288,7 @@ export default function MapHome() {
                   checked={showMonitors}
                   onChange={toggleData}
                 />
-                Show Monitor Locations
-                <MdAdjust />
+                Monitor ( {monitors.length} ) <MdAdjust />
               </label>
 
               <label htmlFor="isolate">
@@ -299,8 +300,7 @@ export default function MapHome() {
                   checked={showIsolate}
                   onChange={toggleData}
                 />
-                Show Isolate Locations
-                <MdLoupe />
+                Isolate ( {isolate.length} ) <MdLoupe />
               </label>
             </MapCard>
           </MapOptions>
@@ -441,4 +441,10 @@ export default function MapHome() {
       </Columns>
     </>
   );
+}
+
+export async function getServerSideProps(context) {
+  return {
+    props: {}, // will be passed to the page component as props
+  };
 }
