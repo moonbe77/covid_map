@@ -4,11 +4,11 @@ import styled from 'styled-components';
 import { GrLocationPin } from 'react-icons/gr';
 import { AiOutlineMonitor } from 'react-icons/ai';
 import { MdLoupe, MdAdjust } from 'react-icons/md';
-import ReturnArrow from '../components/ReturnArrow';
 import Divider from '../components/Divider';
 import useGeolocation from '../hook/useGeolocation';
 import MapCard from '../components/MapCard';
 import MapComponent from '../components/MapComponent';
+import Header from '../components/Header';
 
 const Columns = styled.div`
   display: flex;
@@ -184,8 +184,9 @@ export default function MapHome({ venues }) {
       <Head>
         <title>Map of covid Locations on Sydney</title>
       </Head>
-      <ReturnArrow />
-      <h3>COVID MAP</h3>
+      <Header>
+        <h3>COVID MAP</h3>
+      </Header>
       <Divider />
       <Columns>
         <MapOptions>
