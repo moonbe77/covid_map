@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { GrLocationPin } from 'react-icons/gr';
 import { AiOutlineMonitor } from 'react-icons/ai';
 import { MdLoupe, MdAdjust } from 'react-icons/md';
+import Axios from 'axios';
 import Divider from '../components/Divider';
 import useGeolocation from '../hook/useGeolocation';
 import MapCard from '../components/MapCard';
@@ -57,8 +58,12 @@ export default function MapHome({ venues }) {
   const [venuesTypes, setVenuesTypes] = useState([]);
   const [venuesTypeFilter, setVenuesTypeFilter] = useState([]);
   const [closestVenue, setClosestVenue] = useState(null); // distance to closest location
-
   const userLocation = useGeolocation();
+
+  if (!venues) {
+    return <div>data error</div>;
+  }
+
   const closestLocation = () => {
     // return the closest venue to the user location
     const radians = function (degree) {
@@ -95,8 +100,6 @@ export default function MapHome({ venues }) {
     const venuesList = venues.data;
 
     const closest = venuesList.reduce((acc, ven) => {
-      // console.log('acc', acc);
-      // console.log('ven', ven);
       const accValue = haversine(
         uLocation.lat,
         uLocation.lon,
@@ -164,7 +167,6 @@ export default function MapHome({ venues }) {
 
   const toggleData = (el) => {
     const target = el.target.value;
-    console.log(target);
     if (venuesTypeFilter.includes(target)) {
       setVenuesTypeFilter(venuesTypeFilter.filter((e) => e !== target));
     } else {
@@ -266,23 +268,30 @@ export default function MapHome({ venues }) {
 }
 
 export async function getStaticProps() {
-  const fetchVenues = await fetch(
-    'https://data.nsw.gov.au/data/dataset/0a52e6c1-bc0b-48af-8b45-d791a6d8e289/resource/f3a28eed-8c2a-437b-8ac1-2dab3cf760f9/download/venue-data-2020-dec-19-pm.json'
-  ).then((res) => res.json());
+  const fetchDataUrl = await fetch(
+    'https://data.nsw.gov.au/data/api/3/action/package_show?id=0a52e6c1-bc0b-48af-8b45-d791a6d8e289'
+  );
+  const dataUrl = await fetchDataUrl.json();
 
-  if (!fetchVenues) {
+  const { url } = dataUrl.result.resources[1];
+  // const url = 'https://data.nsw.gov.au/data/dataset/0a52e6c1-bc0b-48af-8b45-d791a6d8e289/resource/f3a28eed-8c2a-437b-8ac1-2dab3cf760f9/download/covid-case-locations-30-12-20-9am.json'
+
+  const fetchVenues = await Axios.get(url);
+  const venuesData = fetchVenues.data;
+
+  if (!venuesData) {
     return {
       notFound: true,
     };
   }
-  // get all the venues coming from the api [venus.data] and put all together with an extra key with the type of data
+  // // get all the venues coming from the api [venus.data] and put all together with an extra key with the type of data
 
   const venuesParsed = [];
   // eslint-disable-next-line no-restricted-syntax
-  for (const key in fetchVenues.data) {
-    if (Object.prototype.hasOwnProperty.call(fetchVenues.data, key)) {
+  for (const key in venuesData.data) {
+    if (Object.prototype.hasOwnProperty.call(venuesData.data, key)) {
       // grab every key from venues.data and put the venue type (key) inside the venue data
-      const venuesWithTypeOfVenue = fetchVenues.data[key].map((venue) => ({
+      const venuesWithTypeOfVenue = venuesData.data[key].map((venue) => ({
         ...venue,
         venueType: key,
       }));
@@ -291,10 +300,9 @@ export async function getStaticProps() {
   }
 
   const venues = {
-    date: fetchVenues.date,
+    date: venuesData.date,
     data: venuesParsed,
   };
-
   return {
     props: { venues }, // will be passed to the page component as props
     revalidate: 1,

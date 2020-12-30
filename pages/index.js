@@ -68,10 +68,10 @@ export default function Home() {
         <Disclaimer>
           <h2>DISCLAIMER</h2>
           <p>
-            You should not take this information as oficial, the dataset is from
-            an oficial source and it is NOT modified. This demo is only meant to
-            show that information in a more clear way. This is a personal
-            project to practice and improve my skills as web developer.
+            The dataset is from an oficial source and it is NOT modified. This
+            beta is only meant to show that information in a more clear way.
+            This is a personal project to practice and improve my skills as web
+            developer and to have a quick access to this info.
           </p>
         </Disclaimer>
       </Main>
