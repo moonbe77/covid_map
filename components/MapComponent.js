@@ -77,7 +77,7 @@ export default function MapComponent({ markers, venuesTypeFilter }) {
     }
   }, []);
 
-  if (markers.length === 0) {
+  if (markers?.length === 0) {
     return (
       <MapWrapper>
         <Loading>loading...</Loading>

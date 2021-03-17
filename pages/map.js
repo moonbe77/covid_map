@@ -1,11 +1,13 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState } from 'react';
+import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import Head from 'next/head';
 import styled from 'styled-components';
 import { GrLocationPin } from 'react-icons/gr';
+import Axios from 'axios';
 import { AiOutlineMonitor } from 'react-icons/ai';
 import { MdLoupe, MdAdjust } from 'react-icons/md';
-import Axios from 'axios';
+import { measureGeoDistance } from '../utils/measureGeoDistance';
 import Divider from '../components/Divider';
 import useGeolocation from '../hook/useGeolocation';
 import MapCard from '../components/MapCard';
@@ -54,89 +56,56 @@ const MapOptions = styled.div`
   gap: 1rem;
 `;
 
-export default function MapHome({ venues }) {
+export default function MapHome() {
+  const [venues, setVenues] = useState([]);
   const [venuesTypes, setVenuesTypes] = useState([]);
   const [venuesTypeFilter, setVenuesTypeFilter] = useState([]);
   const [closestVenue, setClosestVenue] = useState(null); // distance to closest location
   const userLocation = useGeolocation();
 
-  if (!venues) {
-    return <div>data error</div>;
-  }
+  const { isLoading, error, data: urlData } = useQuery('urlData', () =>
+    fetch(
+      'https://data.nsw.gov.au/data/api/3/action/package_show?id=0a52e6c1-bc0b-48af-8b45-d791a6d8e289'
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        const { url } = data.result.resources[1];
+        return url;
+      })
+  );
 
-  const closestLocation = () => {
-    // return the closest venue to the user location
-    const radians = function (degree) {
-      // degrees to radians
-      const rad = (degree * Math.PI) / 180;
+  const getVenues = fetch(urlData)
+    .then((data) => data.json())
+    .then((data) => {
+      const venuesParsed = [];
+      // eslint-disable-next-line no-restricted-syntax
+      for (const key in data.data) {
+        if (Object.prototype.hasOwnProperty.call(data.data, key)) {
+          // grab every key from venues.data and put the venue type (key) inside the venue data
+          const venuesWithTypeOfVenue = data.data[key].map((venue) => ({
+            ...venue,
+            venueType: key,
+          }));
+          venuesParsed.push(...venuesWithTypeOfVenue);
+        }
+      }
 
-      return rad;
-    };
-    const haversine = (lat1, lon1, lat2, lon2) => {
-      const R = 6372.8; // km
-      const dlat = radians(lat2 - lat1);
-      const dlon = radians(lon2 - lon1);
-      const Lat1 = radians(lat1);
-      const Lat2 = radians(lat2);
-      const a =
-        Math.sin(dlat / 2) * Math.sin(dlat / 2) +
-        Math.sin(dlon / 2) *
-          Math.sin(dlon / 2) *
-          Math.cos(Lat1) *
-          Math.cos(Lat2);
-      const c = 2 * Math.asin(Math.sqrt(a));
-      return R * c;
-    };
+      return venuesParsed;
+    });
 
-    const uLocation = {
-      lat: userLocation.latitude,
-      lon: userLocation.longitude,
-    };
-
-    if (userLocation.error != null || Object.keys(venues).length === 0) {
-      return;
+  const { isIdle, error: venuesError, data: venuesData } = useQuery(
+    'venues',
+    getVenues,
+    {
+      enabled: !!urlData,
     }
+  );
 
-    const venuesList = venues.data;
-
-    const closest = venuesList.reduce((acc, ven) => {
-      const accValue = haversine(
-        uLocation.lat,
-        uLocation.lon,
-        acc.Lat,
-        acc.Lon
-      );
-      const newValue = haversine(
-        uLocation.lat,
-        uLocation.lon,
-        ven.Lat.split(',')[0],
-        ven.Lon.split(',')[0]
-      );
-      return accValue < newValue ? acc : ven;
-    }, {});
-
-    return closest;
-  };
-
-  const measureDistance = () => {
-    const p1 = new window.gMaps.LatLng(
-      userLocation.latitude,
-      userLocation.longitude
-    );
-    const closest = closestLocation();
-
-    const p2 = new window.gMaps.LatLng(closest.Lat, closest.Lon);
-    const D = (
-      window.gMaps.geometry.spherical.computeDistanceBetween(p1, p2) / 1000
-    ).toFixed(2); // in Km
-
-    setClosestVenue({ ...closest, D });
-  };
+  console.log(venuesError, venuesData);
 
   useEffect(() => {
-    if (venues.data.length > 0) {
-      const types = [];
-
+    const types = [];
+    if (venues?.data?.length > 0) {
       venues.data.forEach((ven) => {
         if (types.length === 0) {
           types.push(ven.venueType);
@@ -158,9 +127,9 @@ export default function MapHome({ venues }) {
     if (
       window.gMaps &&
       userLocation.error === null &&
-      Object.keys(venues.data).length !== 0
+      venues?.data?.length !== 0
     ) {
-      measureDistance();
+      setClosestVenue(measureGeoDistance(userLocation, venues));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userLocation, venues]);
@@ -173,6 +142,8 @@ export default function MapHome({ venues }) {
       setVenuesTypeFilter((prevState) => [...prevState, target]);
     }
   };
+
+  if (isLoading) return <div> Loading </div>;
 
   return (
     <>
@@ -220,11 +191,6 @@ export default function MapHome({ venues }) {
           venuesTypeFilter={venuesTypeFilter}
         />
         <VenuesWrapper>
-          <TableTitle>
-            <h3>
-              <GrLocationPin /> Isolate
-            </h3>
-          </TableTitle>
           {Object.keys(venues).length !== 0 && (
             <>
               <TableTitle>
@@ -267,44 +233,44 @@ export default function MapHome({ venues }) {
   );
 }
 
-export async function getStaticProps() {
-  const fetchDataUrl = await fetch(
-    'https://data.nsw.gov.au/data/api/3/action/package_show?id=0a52e6c1-bc0b-48af-8b45-d791a6d8e289'
-  );
-  const dataUrl = await fetchDataUrl.json();
+// export async function getStaticProps() {
+//   const fetchDataUrl = await fetch(
+//     'https://data.nsw.gov.au/data/api/3/action/package_show?id=0a52e6c1-bc0b-48af-8b45-d791a6d8e289'
+//   );
+//   const dataUrl = await fetchDataUrl.json();
 
-  const { url } = dataUrl.result.resources[1];
-  // const url = 'https://data.nsw.gov.au/data/dataset/0a52e6c1-bc0b-48af-8b45-d791a6d8e289/resource/f3a28eed-8c2a-437b-8ac1-2dab3cf760f9/download/covid-case-locations-30-12-20-9am.json'
+//   const { url } = dataUrl.result.resources[1];
+//   // const url = 'https://data.nsw.gov.au/data/dataset/0a52e6c1-bc0b-48af-8b45-d791a6d8e289/resource/f3a28eed-8c2a-437b-8ac1-2dab3cf760f9/download/covid-case-locations-30-12-20-9am.json'
 
-  const fetchVenues = await Axios.get(url);
-  const venuesData = fetchVenues.data;
+//   const fetchVenues = await Axios.get(url);
+//   const venuesData = fetchVenues.data;
 
-  if (!venuesData) {
-    return {
-      notFound: true,
-    };
-  }
-  // // get all the venues coming from the api [venus.data] and put all together with an extra key with the type of data
+//   if (!venuesData) {
+//     return {
+//       notFound: true,
+//     };
+//   }
+//   // get all the venues coming from the api [venus.data] and put all together with an extra key with the type of data
 
-  const venuesParsed = [];
-  // eslint-disable-next-line no-restricted-syntax
-  for (const key in venuesData.data) {
-    if (Object.prototype.hasOwnProperty.call(venuesData.data, key)) {
-      // grab every key from venues.data and put the venue type (key) inside the venue data
-      const venuesWithTypeOfVenue = venuesData.data[key].map((venue) => ({
-        ...venue,
-        venueType: key,
-      }));
-      venuesParsed.push(...venuesWithTypeOfVenue);
-    }
-  }
+//   const venuesParsed = [];
+//   // eslint-disable-next-line no-restricted-syntax
+//   for (const key in venuesData.data) {
+//     if (Object.prototype.hasOwnProperty.call(venuesData.data, key)) {
+//       // grab every key from venues.data and put the venue type (key) inside the venue data
+//       const venuesWithTypeOfVenue = venuesData.data[key].map((venue) => ({
+//         ...venue,
+//         venueType: key,
+//       }));
+//       venuesParsed.push(...venuesWithTypeOfVenue);
+//     }
+//   }
 
-  const venues = {
-    date: venuesData.date,
-    data: venuesParsed,
-  };
-  return {
-    props: { venues }, // will be passed to the page component as props
-    revalidate: 1,
-  };
-}
+//   const venues = {
+//     date: venuesData.date,
+//     data: venuesParsed,
+//   };
+//   return {
+//     props: { venues }, // will be passed to the page component as props
+//     revalidate: 1,
+//   };
+// }
