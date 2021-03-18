@@ -61,7 +61,6 @@ export default function MapComponent({ markers, venuesTypeFilter }) {
     const venuesFiltered = [];
     venuesTypeFilter.forEach((element) => {
       const filtered = markers.filter((ven) => ven.venueType === element);
-      console.log(element);
       venuesFiltered.push(...filtered);
     });
 

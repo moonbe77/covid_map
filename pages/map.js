@@ -1,13 +1,14 @@
+/* eslint-disable no-unused-expressions */
 /* eslint-disable react/prop-types */
 import { useEffect, useState } from 'react';
-import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
+import { useQuery } from 'react-query';
 import Head from 'next/head';
 import styled from 'styled-components';
-import { GrLocationPin } from 'react-icons/gr';
-import Axios from 'axios';
-import { AiOutlineMonitor } from 'react-icons/ai';
-import { MdLoupe, MdAdjust } from 'react-icons/md';
+// import { GrLocationPin } from 'react-icons/gr';
+// import { AiOutlineMonitor } from 'react-icons/ai';
+import { MdAdjust } from 'react-icons/md';
 import { measureGeoDistance } from '../utils/measureGeoDistance';
+import { getVenuesType } from '../utils/dataParsing';
 import Divider from '../components/Divider';
 import useGeolocation from '../hook/useGeolocation';
 import MapCard from '../components/MapCard';
@@ -63,26 +64,43 @@ export default function MapHome() {
   const [closestVenue, setClosestVenue] = useState(null); // distance to closest location
   const userLocation = useGeolocation();
 
-  const { isLoading, error, data: urlData } = useQuery('urlData', () =>
-    fetch(
-      'https://data.nsw.gov.au/data/api/3/action/package_show?id=0a52e6c1-bc0b-48af-8b45-d791a6d8e289'
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        const { url } = data.result.resources[1];
-        return url;
-      })
-  );
+  const queryFunction = async (url) => {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed fetching data');
+    }
 
-  const getVenues = fetch(urlData)
-    .then((data) => data.json())
-    .then((data) => {
+    return response.json();
+  };
+
+  const { isLoading, data: urlData } = useQuery('urlData', async () => {
+    const data = await queryFunction(
+      'https://data.nsw.gov.au/data/api/3/action/package_show?id=0a52e6c1-bc0b-48af-8b45-d791a6d8e289'
+    );
+    const { url } = data.result.resources[1];
+    return url;
+  });
+  console.log(urlData);
+
+  const { isIdle, data: venuesData } = useQuery(
+    'venues',
+    () => queryFunction(urlData),
+    {
+      enabled: !!urlData,
+    }
+  );
+  console.log(isIdle);
+  console.log(venuesData);
+
+  useEffect(() => {
+    if (!isIdle && venuesData) {
       const venuesParsed = [];
+
       // eslint-disable-next-line no-restricted-syntax
-      for (const key in data.data) {
-        if (Object.prototype.hasOwnProperty.call(data.data, key)) {
-          // grab every key from venues.data and put the venue type (key) inside the venue data
-          const venuesWithTypeOfVenue = data.data[key].map((venue) => ({
+      for (const key in venuesData.data) {
+        if (Object.prototype.hasOwnProperty.call(venuesData.data, key)) {
+          // fill venues.data with venue type (key) (monitor, isolation, ...)
+          const venuesWithTypeOfVenue = venuesData.data[key].map((venue) => ({
             ...venue,
             venueType: key,
           }));
@@ -90,33 +108,12 @@ export default function MapHome() {
         }
       }
 
-      return venuesParsed;
-    });
-
-  const { isIdle, error: venuesError, data: venuesData } = useQuery(
-    'venues',
-    getVenues,
-    {
-      enabled: !!urlData,
+      setVenues({ date: venuesData.date, data: venuesParsed });
     }
-  );
-
-  console.log(venuesError, venuesData);
+  }, [venuesData, isIdle]);
 
   useEffect(() => {
-    const types = [];
-    if (venues?.data?.length > 0) {
-      venues.data.forEach((ven) => {
-        if (types.length === 0) {
-          types.push(ven.venueType);
-          return;
-        }
-
-        types.includes(ven.venueType) === false && types.push(ven.venueType);
-      });
-
-      setVenuesTypes(types);
-    }
+    venues?.data && setVenuesTypes(getVenuesType(venues));
   }, [venues]);
 
   useEffect(() => {
@@ -208,7 +205,7 @@ export default function MapHome() {
                   </tr>
                 </thead>
                 <tbody>
-                  {venues.data.length > 0 &&
+                  {venues?.data?.length > 0 &&
                     venues.data.map((venue, i) => (
                       <tr key={`monitor${i}`}>
                         <td>{venue.Venue}</td>
