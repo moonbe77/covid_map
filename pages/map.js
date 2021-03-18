@@ -80,7 +80,6 @@ export default function MapHome() {
     const { url } = data.result.resources[1];
     return url;
   });
-  console.log(urlData);
 
   const { isIdle, data: venuesData } = useQuery(
     'venues',
@@ -89,8 +88,6 @@ export default function MapHome() {
       enabled: !!urlData,
     }
   );
-  console.log(isIdle);
-  console.log(venuesData);
 
   useEffect(() => {
     if (!isIdle && venuesData) {
