@@ -73,13 +73,17 @@ export default function MapHome() {
     return response.json();
   };
 
-  const { isLoading, data: urlData } = useQuery('urlData', async () => {
-    const data = await queryFunction(
-      'https://data.nsw.gov.au/data/api/3/action/package_show?id=0a52e6c1-bc0b-48af-8b45-d791a6d8e289'
-    );
-    const { url } = data.result.resources[1];
-    return url;
-  });
+  const { isLoading, data: urlData, error, isFetching } = useQuery(
+    'urlData',
+    async () => {
+      const data = await queryFunction(
+        'https://data.nsw.gov.au/data/api/3/action/package_show?id=0a52e6c1-bc0b-48af-8b45-d791a6d8e289'
+      );
+      const { url } = data.result.resources[1];
+      console.log(url);
+      return url;
+    }
+  );
 
   const { isIdle, data: venuesData } = useQuery(
     'venues',
@@ -138,6 +142,7 @@ export default function MapHome() {
   };
 
   if (isLoading) return <div> Loading </div>;
+  if (error) return <div> something went wrong</div>;
 
   return (
     <>
@@ -147,10 +152,13 @@ export default function MapHome() {
       <Header>
         <h3>COVID MAP</h3>
       </Header>
-      <Divider />
+      <Divider isFetching={isFetching} />
       <Columns>
         <MapOptions>
-          <MapCard title="Dataset Date"> {venues.date}</MapCard>
+          <MapCard title="Dataset Info">
+            {venues.date}
+            {venues.length}
+          </MapCard>
           <MapCard title="Closest Venue">
             {closestVenue ? (
               <>
@@ -172,8 +180,8 @@ export default function MapHome() {
                   onChange={toggleData}
                   checked={venuesTypeFilter.includes(type)}
                 />
-                {type} ({' '}
-                {venues.data.filter((ven) => ven.venueType === type).length} ){' '}
+                {type} (
+                {venues.data.filter((ven) => ven.venueType === type).length} )
                 <MdAdjust />
               </label>
             ))}
@@ -198,7 +206,6 @@ export default function MapHome() {
                     <th>Address</th>
                     <th>Date</th>
                     <th>Time</th>
-                    {/* <th>alert</th> */}
                   </tr>
                 </thead>
                 <tbody>
@@ -210,11 +217,6 @@ export default function MapHome() {
                         <td>{venue.Address}</td>
                         <td>{venue.Date}</td>
                         <td>{venue.Time}</td>
-                        {/* <td
-                        dangerouslySetInnerHTML={{
-                          __html: venue.HealthAdviceHTML,
-                        }}
-                      /> */}
                       </tr>
                     ))}
                 </tbody>
@@ -226,45 +228,3 @@ export default function MapHome() {
     </>
   );
 }
-
-// export async function getStaticProps() {
-//   const fetchDataUrl = await fetch(
-//     'https://data.nsw.gov.au/data/api/3/action/package_show?id=0a52e6c1-bc0b-48af-8b45-d791a6d8e289'
-//   );
-//   const dataUrl = await fetchDataUrl.json();
-
-//   const { url } = dataUrl.result.resources[1];
-//   // const url = 'https://data.nsw.gov.au/data/dataset/0a52e6c1-bc0b-48af-8b45-d791a6d8e289/resource/f3a28eed-8c2a-437b-8ac1-2dab3cf760f9/download/covid-case-locations-30-12-20-9am.json'
-
-//   const fetchVenues = await Axios.get(url);
-//   const venuesData = fetchVenues.data;
-
-//   if (!venuesData) {
-//     return {
-//       notFound: true,
-//     };
-//   }
-//   // get all the venues coming from the api [venus.data] and put all together with an extra key with the type of data
-
-//   const venuesParsed = [];
-//   // eslint-disable-next-line no-restricted-syntax
-//   for (const key in venuesData.data) {
-//     if (Object.prototype.hasOwnProperty.call(venuesData.data, key)) {
-//       // grab every key from venues.data and put the venue type (key) inside the venue data
-//       const venuesWithTypeOfVenue = venuesData.data[key].map((venue) => ({
-//         ...venue,
-//         venueType: key,
-//       }));
-//       venuesParsed.push(...venuesWithTypeOfVenue);
-//     }
-//   }
-
-//   const venues = {
-//     date: venuesData.date,
-//     data: venuesParsed,
-//   };
-//   return {
-//     props: { venues }, // will be passed to the page component as props
-//     revalidate: 1,
-//   };
-// }

@@ -35,7 +35,9 @@ export default function MapComponent({ markers, venuesTypeFilter }) {
     zoom: 12,
   });
   const [showSnapshot, setShowSnapshot] = useState(false);
-  const userLocation = useGeolocation();
+  const userLocation = useGeolocation({}, () => {
+    console.log('geo location acquired');
+  });
 
   const createMapOptions = function () {
     return {
@@ -74,7 +76,7 @@ export default function MapComponent({ markers, venuesTypeFilter }) {
         center: [userLocation.latitude, userLocation.longitude],
       }));
     }
-  }, []);
+  }, [userLocation]);
 
   if (markers?.length === 0) {
     return (
@@ -91,7 +93,6 @@ export default function MapComponent({ markers, venuesTypeFilter }) {
     if (!pin) {
       console.log('algo salio mal');
     } else {
-      // console.log(getData(dataType, index));
       setVenueSelected(markers[index]);
       setShowSnapshot(true);
     }

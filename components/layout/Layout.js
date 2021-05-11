@@ -17,7 +17,9 @@ export default function Layout({ children }) {
     <>
       <MainContainer>{children}</MainContainer>
       <Footer>
-        <p>Website made with love by BMDev</p>
+        <p>
+          Website made by <a href="bmunz.dev/"> bMunz.dev</a>
+        </p>
       </Footer>
     </>
   );

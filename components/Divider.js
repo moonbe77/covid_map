@@ -1,9 +1,17 @@
 import styled from 'styled-components';
+import PropTypes from 'prop-types';
 
 const DividerStyled = styled.div`
   height: 5px;
-  border-bottom: 2px solid gray;
+  border-bottom: ${({ isFetching }) =>
+    isFetching ? '2px solid red' : '2px solid gray'};
 `;
-export default function Divider() {
-  return <DividerStyled />;
+
+function Divider({ isFetching }) {
+  return <DividerStyled isFetching={isFetching} />;
 }
+
+export default Divider;
+Divider.propTypes = {
+  isFetching: PropTypes.bool,
+};

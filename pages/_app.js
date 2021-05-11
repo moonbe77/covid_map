@@ -1,10 +1,17 @@
-/* eslint-disable react/jsx-props-no-spreading */
 import { createGlobalStyle, ThemeProvider } from 'styled-components';
 import Head from 'next/head';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { ReactQueryDevtools } from 'react-query/devtools';
 import Layout from '../components/layout/Layout';
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: true,
+      refetchInterval: false,
+    },
+  },
+});
 
 const GlobalStyle = createGlobalStyle`
  
@@ -64,6 +71,7 @@ export default function App({ Component, pageProps }) {
         <ThemeProvider theme={theme}>
           <Layout>
             <Component {...pageProps} />
+            <ReactQueryDevtools initialIsOpen={false} />
           </Layout>
         </ThemeProvider>
       </QueryClientProvider>
