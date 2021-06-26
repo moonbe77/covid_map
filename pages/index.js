@@ -69,9 +69,14 @@ export default function Home() {
           <h2>DISCLAIMER</h2>
           <p>
             The dataset is from an oficial source and it is NOT modified. This
-            beta is only meant to show that information in a more clear way.
-            This is a personal project to practice and improve my skills as web
-            developer and to have a quick access to this info.
+            beta project is only meant to show the information from the dataset in a more graphical way.
+          </p>
+          <p>
+            <h2>Good to have features</h2>
+            <ul>
+              <li>Given an address show how close from a spot it is</li>
+              <li>Add more information and number about the outbreak</li>
+            </ul>
           </p>
         </Disclaimer>
       </Main>

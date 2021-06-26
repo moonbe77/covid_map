@@ -80,7 +80,6 @@ export default function MapHome() {
         'https://data.nsw.gov.au/data/api/3/action/package_show?id=0a52e6c1-bc0b-48af-8b45-d791a6d8e289'
       );
       const { url } = data.result.resources[1];
-      console.log(url);
       return url;
     }
   );
@@ -147,7 +146,7 @@ export default function MapHome() {
   return (
     <>
       <Head>
-        <title>Map of covid Locations on Sydney</title>
+        <title>Map of covid locations on Sydney</title>
       </Head>
       <Header>
         <h3>COVID MAP</h3>
