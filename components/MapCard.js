@@ -8,11 +8,12 @@ const CardStyled = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 1rem;
+  padding: 0.5rem;
   position: relative;
   height: 100px;
   min-width: 160px;
   flex: 1;
+  align-items: stretch;
 
   @media (max-width: 680px) {
     padding: 10px;
@@ -35,12 +36,18 @@ const CardBody = styled.div`
   font-weight: 700;
   text-align: center;
 `;
+const CardFooter = styled.div`
+  border-top: 1px solid gray;
+  flex: 1;
+  text-align: center;
+`;
 
-export default function MapCard({ children, title }) {
+export default function MapCard({ children, title, footer }) {
   return (
     <CardStyled>
       <CardHeader>{title}</CardHeader>
       <CardBody>{children}</CardBody>
+      <CardFooter>{footer}</CardFooter>
     </CardStyled>
   );
 }

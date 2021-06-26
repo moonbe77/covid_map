@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-expressions */
 /* eslint-disable react/prop-types */
 import { useEffect, useState } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery, useIsFetching } from 'react-query';
 import Head from 'next/head';
 import styled from 'styled-components';
 // import { GrLocationPin } from 'react-icons/gr';
@@ -60,11 +60,13 @@ const MapOptions = styled.div`
 export default function MapHome() {
   const [venues, setVenues] = useState([]);
   const [venuesTypes, setVenuesTypes] = useState([]);
+  const [isDataUpToDate, setIsDataUpToDate] = useState(false);
   const [venuesTypeFilter, setVenuesTypeFilter] = useState([]);
   const [closestVenue, setClosestVenue] = useState(null); // distance to closest location
   const userLocation = useGeolocation();
+  const isFetchingData = useIsFetching();
 
-  const queryFunction = async (url) => {
+  const fetcher = async (url) => {
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error('Failed fetching data');
@@ -74,25 +76,36 @@ export default function MapHome() {
   };
 
   const { isLoading, data: urlData, error, isFetching } = useQuery(
-    'urlData',
+    'getDatasetUrl',
     async () => {
-      const data = await queryFunction(
-        'https://data.nsw.gov.au/data/api/3/action/package_show?id=0a52e6c1-bc0b-48af-8b45-d791a6d8e289'
+      const data = await fetcher(
+        'https://data.nsw.gov.au/data/api/3/action/package_show?id=0a52e6c1-bc0b-48af-8b45-d791a6d8e289',
+        {
+          refetchOnMount: true,
+        }
       );
-      const { url } = data.result.resources[1];
-      return url;
+      return data?.result?.resources[1];
     }
   );
 
   const { isIdle, data: venuesData } = useQuery(
-    'venues',
-    () => queryFunction(urlData),
+    'getVenues',
+    () => fetcher(urlData.url),
     {
-      enabled: !!urlData,
+      enabled: !!urlData?.url, // !! converts in a boolean value the state of the urlData variable
     }
   );
 
   useEffect(() => {
+    const venuesDate = new Date(venuesData?.date).getDate();
+    const lastModified = new Date(urlData?.last_modified).getDate();
+    const status = venuesDate === lastModified;
+    setIsDataUpToDate(status);
+  }, [venuesData, urlData]);
+
+  useEffect(() => {
+    // if (last_modified) console.log(last_modified);
+
     if (!isIdle && venuesData) {
       const venuesParsed = [];
 
@@ -131,17 +144,18 @@ export default function MapHome() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userLocation, venues]);
 
-  const toggleData = (el) => {
-    const target = el.target.value;
-    if (venuesTypeFilter.includes(target)) {
-      setVenuesTypeFilter(venuesTypeFilter.filter((e) => e !== target));
+  const filterData = (el) => {
+    const filter = el.target.value;
+    if (venuesTypeFilter.includes(filter)) {
+      setVenuesTypeFilter(venuesTypeFilter.filter((e) => e !== filter));
     } else {
-      setVenuesTypeFilter((prevState) => [...prevState, target]);
+      setVenuesTypeFilter((prevState) => [...prevState, filter]);
     }
   };
 
   if (isLoading) return <div> Loading </div>;
   if (error) return <div> something went wrong</div>;
+  console.log(isDataUpToDate);
 
   return (
     <>
@@ -154,11 +168,13 @@ export default function MapHome() {
       <Divider isFetching={isFetching} />
       <Columns>
         <MapOptions>
-          <MapCard title="Dataset Info">
+          <MapCard
+            title="Dataset Info"
+            footer={isDataUpToDate ? 'updated' : 'NOT up to date'}
+          >
             {venues.date}
-            {venues.length}
           </MapCard>
-          <MapCard title="Closest Venue">
+          <MapCard title="Closest Venue" footer="from your location">
             {closestVenue ? (
               <>
                 <div>{`${closestVenue.D} km` || '-'}</div>
@@ -168,7 +184,10 @@ export default function MapHome() {
               <div>LOADING</div>
             )}
           </MapCard>
-          <MapCard title="Options">
+          <MapCard
+            title="Options"
+            footer={isFetchingData ? 'updating' : 'updated'}
+          >
             {venuesTypes.map((type) => (
               <label key={type} htmlFor={type}>
                 <input
@@ -176,7 +195,7 @@ export default function MapHome() {
                   id={type}
                   name={type}
                   value={type}
-                  onChange={toggleData}
+                  onChange={filterData}
                   checked={venuesTypeFilter.includes(type)}
                 />
                 {type} (
