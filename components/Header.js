@@ -29,7 +29,7 @@ export default function Header({ children }) {
           <ReturnArrow />
         </LeftBox>
         <CenterBox>{children}</CenterBox>
-        <RightBox>BM Dev</RightBox>
+        <RightBox><a href="https://www.bmunz.dev/"> bMunz.dev</a></RightBox>
       </HeaderStyled>
     </>
   );
