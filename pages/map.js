@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-expressions */
-/* eslint-disable react/prop-types */
 import { useEffect, useState } from 'react';
 import { useQuery, useIsFetching } from 'react-query';
 import Head from 'next/head';
