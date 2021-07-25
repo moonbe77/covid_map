@@ -132,7 +132,6 @@ export default function MapComponent({ markers, venuesTypeFilter }) {
               data-type="userLocation"
               typeOfPin="userLocation"
               text="user"
-              // onClick={handlePinClick}
             >
               USER
             </MapPin>

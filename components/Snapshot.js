@@ -13,6 +13,7 @@ const SnapshotStyled = styled.div`
   width: 100%;
   box-shadow: 0 0 7px 0px #cdcbcb;
   border-radius: 8px;
+  z-index: 10;
 
   @media (max-width: 680px) {
     position: absolute;

@@ -7,7 +7,7 @@
 ## Technologies
   * Next.js
   * Google Map
-  * Google
+  * Google API
   * styled-components
 
 ***

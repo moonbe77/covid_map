@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react';
 import { useQuery, useIsFetching } from 'react-query';
 import Head from 'next/head';
 import styled from 'styled-components';
-// import { GrLocationPin } from 'react-icons/gr';
-// import { AiOutlineMonitor } from 'react-icons/ai';
 import { MdAdjust } from 'react-icons/md';
 import { measureGeoDistance } from '../utils/measureGeoDistance';
 import { getVenuesType } from '../utils/dataParsing';
