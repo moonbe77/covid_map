@@ -1,5 +1,8 @@
 # COVID MAP
 
+<img src="./public/covid_map_mockup.png" alt="covid map mockup image" width="500"/>
+
+
 
 *Project to show the location of venues associated with confirmed COVID-19 cases that have been classified by NSW Health for action. It show the closet location from your position using the browser location if this is allowed.*
 
