@@ -14,7 +14,7 @@ const MapWrapper = styled.div`
 `;
 
 const MapBox = styled.div`
-  height: 60vh;
+  height: 90vh;
   position: relative;
   width: 100%;
   display: flex;
