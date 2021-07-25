@@ -9,9 +9,14 @@
 
 ## Technologies
   * Next.js
-  * Google Map
-  * Google API
+  * react-query
+  * Google Maps
+  * Google Maps JavaScript API
   * styled-components
+
+### TO-DO
+  * highlight closest venue in the map
+  * functionality: given an address show how close it is from venues with associated cases.
 
 ***
 #### CONTACT ME: 
