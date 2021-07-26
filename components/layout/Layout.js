@@ -15,7 +15,6 @@ const Main = styled.main`
   background-color: white;
   display: block;
   flex: 1 0 auto;
-  border: 1px solid red;
 `;
 
 const Footer = styled.footer`

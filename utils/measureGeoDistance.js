@@ -5,7 +5,7 @@ export const measureGeoDistance = (userLocation, venues) => {
     userLocation.latitude,
     userLocation.longitude
   );
-  const closest = closestLocation(userLocation, venues.data);
+  const closest = closestLocation(userLocation, venues);
 
   const p2 = new window.gMaps.LatLng(closest?.Lat, closest?.Lon);
   const D = (

@@ -21,7 +21,7 @@ const Loading = styled.div`
   margin: 6rem auto;
 `;
 
-export default function MapComponent({ markers, venuesTypeFilter }) {
+export default function MapComponent({ markers = null }) {
   const [venueSelected, setVenueSelected] = useState({});
   const [markersOnMap, setMarkersOnMap] = useState([]);
   const [mapState, setMapState] = useState({
@@ -52,16 +52,8 @@ export default function MapComponent({ markers, venuesTypeFilter }) {
   };
 
   useEffect(() => {
-    // FIXME: make this to work with an array of filters
-
-    const venuesFiltered = [];
-    venuesTypeFilter.forEach((element) => {
-      const filtered = markers.filter((ven) => ven.venueType === element);
-      venuesFiltered.push(...filtered);
-    });
-
-    setMarkersOnMap(venuesFiltered);
-  }, [markers, venuesTypeFilter]);
+    setMarkersOnMap(markers);
+  }, [markers]);
 
   useEffect(() => {
     if (userLocation.latitude !== null) {
@@ -72,7 +64,22 @@ export default function MapComponent({ markers, venuesTypeFilter }) {
     }
   }, [userLocation]);
 
-  if (markers?.length === 0) {
+
+  
+  const handlePinClick = (e) => {
+    const pin = e.target;
+    const dataType = pin.dataset.type;
+    const { index } = pin.dataset;
+    
+    if (!pin) {
+      console.log('algo salio mal');
+    } else {
+      setVenueSelected(markers[index]);
+      setShowSnapshot(true);
+    }
+  }; 
+  
+  if (!markers||markers?.length === 0) {
     return (
       <MapBox>
         <Loading>loading...</Loading>
@@ -80,18 +87,7 @@ export default function MapComponent({ markers, venuesTypeFilter }) {
     );
   }
 
-  const handlePinClick = (e) => {
-    const pin = e.target;
-    const dataType = pin.dataset.type;
-    const { index } = pin.dataset;
-
-    if (!pin) {
-      console.log('algo salio mal');
-    } else {
-      setVenueSelected(markers[index]);
-      setShowSnapshot(true);
-    }
-  };
+  console.log('render');
 
   return (
     <MapBox>
@@ -106,7 +102,7 @@ export default function MapComponent({ markers, venuesTypeFilter }) {
         yesIWantToUseGoogleMapApiInternals
         onGoogleApiLoaded={({ map, maps }) => handleApiLoaded(map, maps)}
       >
-        {markersOnMap.length > 0 &&
+        {markersOnMap?.length > 0 &&
           markersOnMap.map((venue, i) => (
             <MapPin
               key={`marker-${i}`}

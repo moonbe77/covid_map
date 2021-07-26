@@ -4,15 +4,12 @@ import Head from 'next/head';
 import styled from 'styled-components';
 import { MdAdjust } from 'react-icons/md';
 import { measureGeoDistance } from '../utils/measureGeoDistance';
-import { getVenuesType } from '../utils/dataParsing';
+import { getVenuesType, addVenueType } from '../utils/dataParse';
 import Divider from '../components/Divider';
 import useGeolocation from '../hook/useGeolocation';
 import MapCard from '../components/MapCard';
 import MapComponent from '../components/MapComponent';
 import breakpoint from '../utils/breakpoints';
-
-// import VenuesTable from '../components/VenuesTable';
-
 
 const MapWrapper = styled.div`
   box-shadow: 0 0 7px -4px gray;
@@ -47,9 +44,8 @@ const MapOptions = styled.div`
 
 export default function MapHome() {
   const [venues, setVenues] = useState([]);
-  const [venuesTypes, setVenuesTypes] = useState([]);
+  const [datasetDate, setDatasetDate] = useState(null);
   const [isDataUpToDate, setIsDataUpToDate] = useState(false);
-  const [venuesTypeFilter, setVenuesTypeFilter] = useState([]);
   const [closestVenue, setClosestVenue] = useState(null); // distance to closest location
   const userLocation = useGeolocation();
   const isFetchingData = useIsFetching();
@@ -76,7 +72,7 @@ export default function MapHome() {
     }
   );
 
-  const { isIdle, data: venuesData } = useQuery(
+  const { isSuccess , data: venuesData } = useQuery(
     'getVenues',
     () => fetcher(urlData.url),
     {
@@ -84,63 +80,37 @@ export default function MapHome() {
     }
   );
 
+  
   useEffect(() => {
-    const venuesDate = new Date(venuesData?.date).getDate();
-    const lastModified = new Date(urlData?.last_modified).getDate();
-    const status = venuesDate === lastModified;
-    setIsDataUpToDate(status);
-  }, [venuesData, urlData]);
-
-  useEffect(() => {
-    // if (last_modified) console.log(last_modified);
-
-    if (!isIdle && venuesData) {
-      const venuesParsed = [];
-
-      for (const key in venuesData.data) {
-        if (Object.prototype.hasOwnProperty.call(venuesData.data, key)) {
-          // fill venues.data with venue type (key) (monitor, isolation, ...)
-          const venuesWithTypeOfVenue = venuesData.data[key].map((venue) => ({
-            ...venue,
-            venueType: key,
-          }));
-          venuesParsed.push(...venuesWithTypeOfVenue);
-        }
-      }
-
-      setVenues({ date: venuesData.date, data: venuesParsed });
+    if (venuesData !== undefined) {
+      setVenues(addVenueType(venuesData.data))
+      setDatasetDate(venuesData.date)
     }
-  }, [venuesData, isIdle]);
+  }, [venuesData]);
 
   useEffect(() => {
-    venues?.data && setVenuesTypes(getVenuesType(venues));
-  }, [venues]);
-
-  useEffect(() => {
-    setVenuesTypeFilter(venuesTypes);
-  }, [venuesTypes]);
+    if (isSuccess  && venuesData !== undefined) {
+      const venuesDate = new Date(venuesData.date).getDate();
+      const lastModified = new Date(urlData?.last_modified).getDate();
+      const status = venuesDate === lastModified;
+      setIsDataUpToDate(status);
+    }
+  }, [venuesData, urlData, isSuccess]);
 
   useEffect(() => {
     if (
       window.gMaps &&
       userLocation.error === null &&
-      venues?.data?.length !== 0
+      venues.length !== 0
     ) {
+      console.log('closestVenus >>;)>>',);
       setClosestVenue(measureGeoDistance(userLocation, venues));
     }
   }, [userLocation, venues]);
 
-  const filterData = (el) => {
-    const filter = el.target.value;
-    if (venuesTypeFilter.includes(filter)) {
-      setVenuesTypeFilter(venuesTypeFilter.filter((e) => e !== filter));
-    } else {
-      setVenuesTypeFilter((prevState) => [...prevState, filter]);
-    }
-  };
-
   if (isLoading) return <div> Loading </div>;
   if (error) return <div> something went wrong!</div>
+
 
   return (
     <>
@@ -154,7 +124,7 @@ export default function MapHome() {
             title="Dataset Info"
             footer={isDataUpToDate ? 'updated' : 'NOT up to date'}
           >
-            {venues.date}
+            {datasetDate}
           </MapCard>
           <MapCard title="Closest Venue" footer="from your location">
             {closestVenue ? (
@@ -163,36 +133,15 @@ export default function MapHome() {
                 <div>{closestVenue.Venue}</div>
               </>
             ) : (
-              <div>LOADING</div>
+              <div>calculating</div>
             )}
           </MapCard>
-          <MapCard
-            title="Options"
-            footer={isFetchingData ? 'updating' : 'updated'}
-          >
-            {venuesTypes.map((type) => (
-              <label key={type} htmlFor={type}>
-                <input
-                  type="checkbox"
-                  id={type}
-                  name={type}
-                  value={type}
-                  onChange={filterData}
-                  checked={venuesTypeFilter.includes(type)}
-                />
-                {type} (
-                {venues.data.filter((ven) => ven.venueType === type).length} )
-                <MdAdjust />
-              </label>
-            ))}
-          </MapCard>
+
         </MapOptions>
         <MapComponent
-          markers={venues.data}
+          markers={venues}
           userLocation={userLocation}
-          venuesTypeFilter={venuesTypeFilter}
         />
-        {/* {venues && <VenuesTable venues={venues} />} */}
       </MapWrapper>
 
     </>
