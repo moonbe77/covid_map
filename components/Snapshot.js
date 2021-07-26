@@ -106,7 +106,7 @@ Snapshot.defaultProps = {
 
 Snapshot.propTypes = {
   info: PropTypes.object,
-  toggleSnapshot: PropTypes.bool,
+  toggleSnapshot: PropTypes.func,
   // Alert: PropTypes.string,
   // Address: PropTypes.string,
   // Date: PropTypes.string,

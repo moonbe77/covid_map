@@ -28,6 +28,7 @@ const useGeolocation = (
         longitude,
         speed,
       } = coords;
+
       if (!didCancel) {
         setCoordinates({
           accuracy,
@@ -40,6 +41,7 @@ const useGeolocation = (
           timestamp,
           error: null,
         });
+        
         if (callback instanceof Function) {
           callback({
             accuracy,

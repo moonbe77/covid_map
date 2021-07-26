@@ -9,38 +9,25 @@ import Divider from '../components/Divider';
 import useGeolocation from '../hook/useGeolocation';
 import MapCard from '../components/MapCard';
 import MapComponent from '../components/MapComponent';
-import Header from '../components/Header';
+import breakpoint from '../utils/breakpoints';
 
-const Columns = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-const VenuesWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  margin-top: 1rem;
-`;
+// import VenuesTable from '../components/VenuesTable';
 
-const ListOfVenues = styled.table`
-  max-width: 100%;
-  overflow: hidden;
-  th {
-    background-color: black;
-    color: white;
-    padding: 5px;
-  }
-  th {
-    height: 40px;
-  }
-  td {
-    padding: 10px 5px;
-  }
-  tr:nth-child(2n + 3) {
-    background-color: #e5e5e5;
-  }
-`;
-const TableTitle = styled.div`
-  text-align: center;
+
+const MapWrapper = styled.div`
+  box-shadow: 0 0 7px -4px gray;
+  height: 80%;
+  position: relative;
+
+    @media only screen and ${breakpoint.device.xs}{
+    height: 50%;
+    }
+    /* @media only screen and ${breakpoint.device.sm}{
+        display: flex;
+    }
+    @media only screen and ${breakpoint.device.lg}{
+        display: flex;
+    } */
 `;
 
 const MapOptions = styled.div`
@@ -51,6 +38,11 @@ const MapOptions = styled.div`
   justify-content: space-around;
   padding: 1em;
   gap: 1rem;
+  height: 20%;
+
+    @media only screen and ${breakpoint.device.xs}{
+      height: 50%;
+    }
 `;
 
 export default function MapHome() {
@@ -105,7 +97,6 @@ export default function MapHome() {
     if (!isIdle && venuesData) {
       const venuesParsed = [];
 
-      // eslint-disable-next-line no-restricted-syntax
       for (const key in venuesData.data) {
         if (Object.prototype.hasOwnProperty.call(venuesData.data, key)) {
           // fill venues.data with venue type (key) (monitor, isolation, ...)
@@ -137,7 +128,6 @@ export default function MapHome() {
     ) {
       setClosestVenue(measureGeoDistance(userLocation, venues));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userLocation, venues]);
 
   const filterData = (el) => {
@@ -150,19 +140,15 @@ export default function MapHome() {
   };
 
   if (isLoading) return <div> Loading </div>;
-  if (error) return <div> something went wrong</div>;
-  console.log(isDataUpToDate);
+  if (error) return <div> something went wrong!</div>
 
   return (
     <>
       <Head>
         <title>Map of covid locations on Sydney</title>
       </Head>
-      <Header>
-        <h3>COVID MAP</h3>
-      </Header>
       <Divider isFetching={isFetching} />
-      <Columns>
+      <MapWrapper>
         <MapOptions>
           <MapCard
             title="Dataset Info"
@@ -206,39 +192,9 @@ export default function MapHome() {
           userLocation={userLocation}
           venuesTypeFilter={venuesTypeFilter}
         />
-        <VenuesWrapper>
-          {Object.keys(venues).length !== 0 && (
-            <>
-              <TableTitle>
-                <h3>Venues</h3>
-              </TableTitle>
-              <ListOfVenues>
-                <thead>
-                  <tr>
-                    <th>Venue</th>
-                    <th>Suburb</th>
-                    <th>Address</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {venues?.data?.length > 0 &&
-                    venues.data.map((venue, i) => (
-                      <tr key={`monitor${i}`}>
-                        <td>{venue.Venue}</td>
-                        <td>{venue.Suburb}</td>
-                        <td>{venue.Address}</td>
-                        <td>{venue.Date}</td>
-                        <td>{venue.Time}</td>
-                      </tr>
-                    ))}
-                </tbody>
-              </ListOfVenues>
-            </>
-          )}
-        </VenuesWrapper>
-      </Columns>
+        {/* {venues && <VenuesTable venues={venues} />} */}
+      </MapWrapper>
+
     </>
   );
 }

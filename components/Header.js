@@ -7,7 +7,9 @@ const HeaderStyled = styled.header`
   /* justify-content: center; */
   text-align: center;
   align-items: center;
+  height:50px;
 `;
+
 const Box = styled.div`
 `;
 
@@ -21,7 +23,7 @@ const RightBox = styled(Box)`
   flex: 1;
 `;
 
-export default function Header({ children }) {
+export default function HeaderContent({ children }) {
   return (
     <>
       <HeaderStyled>
@@ -35,6 +37,6 @@ export default function Header({ children }) {
   );
 }
 
-Header.propTypes = {
+HeaderContent.propTypes = {
   children: PropTypes.node,
 };

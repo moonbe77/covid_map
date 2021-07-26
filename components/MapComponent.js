@@ -1,5 +1,4 @@
-/* eslint-disable react/jsx-no-bind */
-/* eslint-disable react/prop-types */
+
 import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
@@ -8,20 +7,15 @@ import MapPin from './MapPin';
 import Snapshot from './Snapshot';
 import useGeolocation from '../hook/useGeolocation';
 
-const MapWrapper = styled.div`
-  box-shadow: 0 0 7px -4px gray;
-  margin-top: 1rem;
-`;
-
 const MapBox = styled.div`
-  height: 90vh;
   position: relative;
+  height:100%; 
   width: 100%;
   display: flex;
   justify-content: center;
-  align-items: center;
-  overflow: hidden;
+  align-items: center; 
 `;
+
 const Loading = styled.div`
   width: 100px;
   margin: 6rem auto;
@@ -80,11 +74,12 @@ export default function MapComponent({ markers, venuesTypeFilter }) {
 
   if (markers?.length === 0) {
     return (
-      <MapWrapper>
+      <MapBox>
         <Loading>loading...</Loading>
-      </MapWrapper>
+      </MapBox>
     );
   }
+
   const handlePinClick = (e) => {
     const pin = e.target;
     const dataType = pin.dataset.type;
@@ -99,51 +94,49 @@ export default function MapComponent({ markers, venuesTypeFilter }) {
   };
 
   return (
-    <MapWrapper>
-      <MapBox>
-        <GoogleMapReact
-          bootstrapURLKeys={{
-            libraries: ['geometry'],
-            key: process.env.NEXT_PUBLIC_MAPS_API_KEY,
-          }}
-          options={createMapOptions}
-          center={mapState.center}
-          zoom={mapState.zoom}
-          yesIWantToUseGoogleMapApiInternals
-          onGoogleApiLoaded={({ map, maps }) => handleApiLoaded(map, maps)}
-        >
-          {markersOnMap.length > 0 &&
-            markersOnMap.map((venue, i) => (
-              <MapPin
-                key={`marker-${i}`}
-                lat={venue.Lat.split(',')[0]}
-                lng={venue.Lon.split(',')[0]}
-                data-index={i}
-                data-type={venue.venueType}
-                typeOfPin={venue.venueType} // get type from list
-                onClick={handlePinClick}
-              />
-            ))}
-
-          {userLocation.latitude !== null && (
+    <MapBox>
+      <GoogleMapReact
+        bootstrapURLKeys={{
+          libraries: ['geometry'],
+          key: process.env.NEXT_PUBLIC_MAPS_API_KEY,
+        }}
+        options={createMapOptions}
+        center={mapState.center}
+        zoom={mapState.zoom}
+        yesIWantToUseGoogleMapApiInternals
+        onGoogleApiLoaded={({ map, maps }) => handleApiLoaded(map, maps)}
+      >
+        {markersOnMap.length > 0 &&
+          markersOnMap.map((venue, i) => (
             <MapPin
-              lat={userLocation.latitude}
-              lng={userLocation.longitude}
-              data-type="userLocation"
-              typeOfPin="userLocation"
-              text="user"
-            >
-              USER
-            </MapPin>
-          )}
-        </GoogleMapReact>
-        <Snapshot
-          toggleSnapshot={toggleSnapshot}
-          isOpen={showSnapshot}
-          info={venueSelected}
-        />
-      </MapBox>
-    </MapWrapper>
+              key={`marker-${i}`}
+              lat={venue.Lat.split(',')[0]}
+              lng={venue.Lon.split(',')[0]}
+              data-index={i}
+              data-type={venue.venueType}
+              typeOfPin={venue.venueType} // get type from list
+              onClick={handlePinClick}
+            />
+          ))}
+
+        {userLocation.latitude !== null && (
+          <MapPin
+            lat={userLocation.latitude}
+            lng={userLocation.longitude}
+            data-type="userLocation"
+            typeOfPin="userLocation"
+            text="user"
+          >
+            USER
+          </MapPin>
+        )}
+      </GoogleMapReact>
+      <Snapshot
+        toggleSnapshot={toggleSnapshot}
+        isOpen={showSnapshot}
+        info={venueSelected}
+      />
+    </MapBox>
   );
 }
 
