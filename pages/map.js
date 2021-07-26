@@ -11,35 +11,27 @@ import MapCard from '../components/MapCard';
 import MapComponent from '../components/MapComponent';
 import breakpoint from '../utils/breakpoints';
 
+const ResponsiveMapContainer = styled.section`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+`;
+
 const MapWrapper = styled.div`
   box-shadow: 0 0 7px -4px gray;
   height: 80%;
-  position: relative;
-
-    @media only screen and ${breakpoint.device.xs}{
-    height: 50%;
-    }
-    /* @media only screen and ${breakpoint.device.sm}{
-        display: flex;
-    }
-    @media only screen and ${breakpoint.device.lg}{
-        display: flex;
-    } */
+  position: relative; 
 `;
 
 const MapOptions = styled.div`
   align-items: center;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   flex-direction: row;
   justify-content: space-around;
   padding: 1em;
   gap: 1rem;
   height: 20%;
-
-    @media only screen and ${breakpoint.device.xs}{
-      height: 50%;
-    }
 `;
 
 export default function MapHome() {
@@ -72,7 +64,7 @@ export default function MapHome() {
     }
   );
 
-  const { isSuccess , data: venuesData } = useQuery(
+  const { isSuccess, data: venuesData } = useQuery(
     'getVenues',
     () => fetcher(urlData.url),
     {
@@ -80,7 +72,7 @@ export default function MapHome() {
     }
   );
 
-  
+
   useEffect(() => {
     if (venuesData !== undefined) {
       setVenues(addVenueType(venuesData.data))
@@ -89,7 +81,7 @@ export default function MapHome() {
   }, [venuesData]);
 
   useEffect(() => {
-    if (isSuccess  && venuesData !== undefined) {
+    if (isSuccess && venuesData !== undefined) {
       const venuesDate = new Date(venuesData.date).getDate();
       const lastModified = new Date(urlData?.last_modified).getDate();
       const status = venuesDate === lastModified;
@@ -118,7 +110,7 @@ export default function MapHome() {
         <title>Map of covid locations on Sydney</title>
       </Head>
       <Divider isFetching={isFetching} />
-      <MapWrapper>
+      <ResponsiveMapContainer>
         <MapOptions>
           <MapCard
             title="Dataset Info"
@@ -136,13 +128,14 @@ export default function MapHome() {
               <div>calculating</div>
             )}
           </MapCard>
-
         </MapOptions>
-        <MapComponent
-          markers={venues}
-          userLocation={userLocation}
-        />
-      </MapWrapper>
+        <MapWrapper>
+          <MapComponent
+            markers={venues}
+            userLocation={userLocation}
+          />
+        </MapWrapper>
+      </ResponsiveMapContainer>
 
     </>
   );
